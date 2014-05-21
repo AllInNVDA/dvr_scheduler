@@ -1,7 +1,7 @@
 'use strict';
 
 var should = require('should'),
-    scheduler=require('../scheduler'); 
+    scheduler=require('../../server/scheduler'); 
 
 var tasks = [{
     from:Date.parse("2014-02-11T17:00:00.000Z"),

@@ -1,6 +1,6 @@
 // var intervals = require('interval-query');
 
-var intervals = new require('interval-query').Sequential(),
+var intervals = new require('./lib/sequential').Sequential(),
 	validator = require("./validator");
 
 var tasks = [] ;

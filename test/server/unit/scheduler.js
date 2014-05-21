@@ -1,8 +1,7 @@
 'use strict';
 
 var should = require('should'),
-    // _ = require('lodash'),
-    scheduler=require('../../scheduler'); 
+    scheduler=require('../../../server/scheduler'); 
 
 describe('Scheduler', function() {      
 	describe('#add', function() {       
@@ -47,26 +46,26 @@ describe('Scheduler', function() {
 		    to:Date.parse("2014-02-11T23:00:00.000Z"),         
 		},{},null,undefined,Infinity,NaN];
 		it('should add a task t0', function(done){
-			scheduler.add(tasks[0],function(results){
-				results.should.be.eql({id:0,conflicts:[]});
+			scheduler.add(tasks[0],function(result){
+				result.should.be.eql({id:0,conflicts:[]});
 				done();
 			});
 		});
 		it('should add a task t1: t1.start = t0.end without conflicts', function(done){
-			scheduler.add(tasks[1],function(results){
-				results.should.be.eql({id:1,conflicts:[]});
+			scheduler.add(tasks[1],function(result){
+				result.should.be.eql({id:1,conflicts:[]});
 				done();
 			});
 		});
 		it('should add a task t2: t2.end = t0.start without conflicts', function(done){
-			scheduler.add(tasks[2],function(results){
-				results.should.be.eql({id:2,conflicts:[]});
+			scheduler.add(tasks[2],function(result){
+				result.should.be.eql({id:2,conflicts:[]});
 				done();
 			});
 		});
 		it('should add a task t3 with 3 conflicts', function(done){
-			scheduler.add(tasks[3],function(results){
-				results.should.be.eql({id:3,conflicts:[0,1,2]});
+			scheduler.add(tasks[3],function(result){
+				result.should.be.eql({id:3,conflicts:[0,1,2]});
 				done();
 			});
 		});
