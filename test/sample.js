@@ -20,25 +20,21 @@ var tasks = [{
 
 describe('Sample Tests', function() {          
     it('should add sample tasks', function(done) {
-        var expects = [[
-            //empty array
-        ],[{
-            id:2,
-            from:tasks[0].from,
-            to:tasks[0].to
-        }],[{
-            id:4,
-            from:tasks[1].from,
-            to:tasks[1].to
-        }]];
+        var expects = [{
+                id:0,conflicts:[]},
+            {
+                id:1,
+                conflicts:[0]
+            },{
+                id:2,
+                conflicts:[1]
+            }];
         function add_task(idx,next){
             var task = tasks[idx];
-            var rslt = scheduler.add(
-                task.from,
-                task.to,
-                314,
-                function(conflicts){
-                    conflicts.should.be.eql(expects[idx]); 
+            scheduler.add(                
+                task,
+                function(results){
+                    results.should.be.eql(expects[idx]); 
                     if(idx<tasks.length-1)
                         add_task(idx+1,next);
                     else
@@ -47,79 +43,55 @@ describe('Sample Tests', function() {
             );  
         }               
         add_task(0,function(){
-            scheduler.query([0,Date.parse("2020-01-01T00:00:00.000Z")],function(){},function(results){
-                results.should.be.eql([ 
-                    { id: 2, from: 1392138000000, to: 1392148800000 },
-                    { id: 4, from: 1392147000000, to: 1392156000000 },
-                    { id: 6, from: 1392152400000, to: 1392159600000 } 
-                ]);
+            scheduler.query([0,Date.parse("2020-01-01T00:00:00.000Z")],function(results){
+                results.should.be.eql([0,1,2]);
                 done();
-            });
+            },function(){});
         });
     });
 
-    it('should tell DVR to record 314 @ 2/11/2014 6:10pm', function(done) {              
-        scheduler.query(Date.parse("2014-02-11T18:10:00.000Z"),function(){},function(results){
+    it('should record 314 @ 2/11/2014 6:10pm', function(done) {              
+        scheduler.query(Date.parse("2014-02-11T18:10:00.000Z"),function(results){
             results.should.be.eql([ 
-                {
-                    id:2,
-                    from:tasks[0].from,
-                    to:tasks[0].to
-                }
+                0
             ]);
             done();
-        })
+        },function(){});
     });
 
-    it('should tell DVR to record 215 @ 2/11/2014 8:30pm', function(done) {              
-        scheduler.query(Date.parse("2014-02-11T20:30:00.000Z"),function(){},function(results){
+    it('should record 215 @ 2/11/2014 8:30pm', function(done) {              
+        scheduler.query(Date.parse("2014-02-11T20:30:00.000Z"),function(results){
             results.should.be.eql([ 
-                {
-                    id:4,
-                    from:tasks[1].from,
-                    to:tasks[1].to
-                }
+               1
             ]);
             done();
-        })
+        },function(){});
     });
 
-    it('should tell DVR to record 314 @ 2/11/2014 10:30pm', function(done) {              
-        scheduler.query(Date.parse("2014-02-11T22:30:00.000Z"),function(){},function(results){
+    it('should record 314 @ 2/11/2014 10:30pm', function(done) {              
+        scheduler.query(Date.parse("2014-02-11T22:30:00.000Z"),function(results){
             results.should.be.eql([ 
-                {
-                    id:6,
-                    from:tasks[2].from,
-                    to:tasks[2].to
-                }
+                2
             ]);
             done();
-        })
+        },function(){});
     });
 
-    it('should tell DVR to not record  @ 2/11/2014 3:00pm', function(done) {              
-        scheduler.query(Date.parse("2014-02-11T15:00:00.000Z"),function(){},function(results){
+    it('should not record  @ 2/11/2014 3:00pm', function(done) {              
+        scheduler.query(Date.parse("2014-02-11T15:00:00.000Z"),function(results){
             results.should.be.eql([ 
                 
             ]);
             done();
-        })
+        },function(){});
     });
 
     it('should tell DVR conflicts  @ 2/11/2014 7:45pm', function(done) {              
-        scheduler.query(Date.parse("2014-02-11T19:45:00.000Z"),function(){},function(results){
+        scheduler.query(Date.parse("2014-02-11T19:45:00.000Z"),function(results){
             results.should.be.eql([ 
-                {
-                    id:2,
-                    from:tasks[0].from,
-                    to:tasks[0].to
-                },{
-                    id:4,
-                    from:tasks[1].from,
-                    to:tasks[1].to
-                }
+                0,1
             ]);
             done();
-        })
+        },function(){});
     });
 });

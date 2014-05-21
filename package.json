@@ -2,8 +2,7 @@
   "name": "dvr_scheduler",
   "version": "0.0.1",
   "dependencies": {
-    "crossfilter": "^1.3.7",
-    "interval-query": "^0.3.0"
+    "interval-query": "~0.3.0"
   },
   "devDependencies": {
     "grunt": "~0.4.4",
