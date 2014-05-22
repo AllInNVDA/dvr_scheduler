@@ -4,23 +4,23 @@ This project is...
 
 ## Stack & Tool
 
-[ExpressJS](http://expressjs.com/): power RESTful APIs
+[ExpressJS](http://expressjs.com/): to power RESTful APIs and the client app
 
-[AngularJS](https://angularjs.org/): build the client app (not started)
+[AngularJS](https://angularjs.org/): to build the client app (not started)
 
-[Interval-Query](https://github.com/toberndo/interval-query): hold schedule data
+[Interval-Query](https://github.com/toberndo/interval-query): to hold schedule data
 
-[Grunt](http://gruntjs.com/): manage project tasks
+[Grunt](http://gruntjs.com/): to manage project tasks
 
-[Mocha](http://visionmedia.github.io/mocha/): unit & integration test
+[Mocha](http://visionmedia.github.io/mocha/): for unit & integration testing
 
-[istanbul](http://gotwarlost.github.io/istanbul/): coverage report
+[istanbul](http://gotwarlost.github.io/istanbul/): for coverage report
 
-[protractor](https://github.com/angular/protractor): end to end test (not started)
+[protractor](https://github.com/angular/protractor): for end to end testing (not started)
 
-[supertest](https://github.com/visionmedia/supertest): test RESTful APIs
+[supertest](https://github.com/visionmedia/supertest): for RESTful APIs testing
 
-[groc](https://github.com/nevir/groc): documentation
+[groc](https://github.com/nevir/groc): for documentation
 
 ## Setup
 ```
