@@ -58,7 +58,7 @@ module.exports = function(grunt) {
   });  
   grunt.registerTask('cov', function() {
     return grunt.task.run([        
-        // 'env:test',        
+        'env:test',        
         'mocha_istanbul',
         'open:cov'        
       ]);
