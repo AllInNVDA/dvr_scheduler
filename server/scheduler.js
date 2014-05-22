@@ -46,6 +46,7 @@ module.exports = function(save_path,done){
 	* @param {int} schedule.channel the channel to record
 	* @param {function} next the callback function
 	* @param {function} error the error callback function
+	* @return {object} an id of the added schedule and a lists of conflict schedules
 	*/
 	function add(schedule,next,error){
 		if(!validator.not_null(schedule)) return error("wrong arguments");
@@ -58,7 +59,8 @@ module.exports = function(save_path,done){
 		* So endpoints = false should be used here.
 		*/		
 		intervals.queryInterval(schedule.from, schedule.to,{endpoints:false,resultFn:function(conflicts){
-			var id = intervals.pushInterval(schedule.from, schedule.to);		
+			var id = intervals.pushInterval(schedule.from, schedule.to);
+			schedule.id = id ;		
 			schedules[id] = schedule;		
 
 			/**
@@ -75,7 +77,7 @@ module.exports = function(save_path,done){
 	}
 
 	/**
-	* DVR calls this function to know to what to do at the specified time
+	* DVR calls this function to know to what to record at the specified time
 	*
 	* @public
 	* @async
@@ -83,22 +85,13 @@ module.exports = function(save_path,done){
 	* @param {int} time a time point
 	* @param {function} next the callback function
 	* @param {function} error the error callback function
+	* @return {[int]} a list of prioritized channels
 	*/
 	function query(time,next,error){
 		if(!validator.is_number(time)) return error("wrong arguments");
 		intervals.queryPoint(time,function(intervals){
 			next(_filter(intervals,time));
 		});
-		// if(typeof time === "number" )
-		// 	intervals.queryPoint(time,function(intervals){
-		// 		next(_filter(intervals,time));
-		// 	});
-		// else if(time.length && time.length ===2)
-		// 	intervals.queryInterval(time[0],time[1],{endpoints:true, resultFn: function(intervals){
-		// 		next(_filter(intervals,time[0]));
-		// 	}});
-		// else
-		// 	error("wrong arguments");
 	}
 
 	/**
@@ -106,11 +99,11 @@ module.exports = function(save_path,done){
 	*
 	* @public
 	* @method all
+	* @return {[object]} all schedules 
 	*/
 	function all(){
 		var i = 0 ;
 		return schedules.filter(function(schedule){
-			schedule.id = i++; 
 			return !schedule.removed
 		})
 	}
@@ -124,6 +117,7 @@ module.exports = function(save_path,done){
 	* @param {int} id the id of the schedule to be deleted
 	* @param {function} next the callback function
 	* @param {function} error the error callback function
+	* @return {boolean} if removal is successful
 	*/
 	function remove(id,next,error){		
 		if(!validator.not_null(id)) return error("id is null");
@@ -148,15 +142,16 @@ module.exports = function(save_path,done){
 	* @method _filter
 	* @param {[object]} intervals 	a list of intervals need to be filtered
 	* @param {int} time optional			any schedules that end on this time should be filtered
+	* @return {[object]} a list of filtered schedules
 	*/
 	function _filter(intervals,time){
-		var ids = [];
+		var filtered_schedules = [];
 		intervals.forEach(function(interval){
 			var schedule = schedules[interval.id];
 			if(schedule && !schedule.removed && schedule.to!=time)
-				ids.push(interval.id);
+				filtered_schedules.push(schedule);
 		});
-		return ids;
+		return filtered_schedules;
 	}
 
 	/**
@@ -202,8 +197,8 @@ module.exports = function(save_path,done){
 					var from = buf.readDoubleLE(i); i+=8;	
 					var to = buf.readDoubleLE(i); i+=8;	
 					var channel = buf.readUInt16LE(i); i+=2;
-					var schedule = {from:from,to:to,channel:channel};
-					var id = intervals.pushInterval(schedule.from, schedule.to);						
+					var id = intervals.pushInterval(from, to);
+					var schedule = {from:from,to:to,channel:channel, id:id};											
 					schedules[id] = schedule;					
 				}else if(operation === OPERATIONS.REMOVE){
 					var id = buf.readUInt32LE(i); i+=4;					

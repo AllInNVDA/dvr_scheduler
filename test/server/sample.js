@@ -32,10 +32,10 @@ describe('Sample Tests', function() {
                 id:0,conflicts:[]},
             {
                 id:1,
-                conflicts:[0]
+                conflicts:[tasks[0]]
             },{
                 id:2,
-                conflicts:[1]
+                conflicts:[tasks[1]]
             }];
         function add_task(idx,next){
             var task = tasks[idx];
@@ -61,7 +61,7 @@ describe('Sample Tests', function() {
     it('should record 314 @ 2/11/2014 6:10pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T18:10:00.000Z"),function(results){
             results.should.be.eql([ 
-                0
+                tasks[0]
             ]);
             done();
         },function(){});
@@ -70,7 +70,7 @@ describe('Sample Tests', function() {
     it('should record 215 @ 2/11/2014 8:30pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T20:30:00.000Z"),function(results){
             results.should.be.eql([ 
-               1
+               tasks[1]
             ]);
             done();
         },function(){});
@@ -79,7 +79,7 @@ describe('Sample Tests', function() {
     it('should record 314 @ 2/11/2014 10:30pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T22:30:00.000Z"),function(results){
             results.should.be.eql([ 
-                2
+                tasks[2]
             ]);
             done();
         },function(){});
@@ -97,7 +97,7 @@ describe('Sample Tests', function() {
     it('should tell DVR conflicts  @ 2/11/2014 7:45pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T19:45:00.000Z"),function(results){
             results.should.be.eql([ 
-                0,1
+                tasks[0],tasks[1]
             ]);
             done();
         },function(){});

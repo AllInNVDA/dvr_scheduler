@@ -7,29 +7,29 @@ var should = require('should'),
 
 describe('Scheduler', function() {     
 	var scheduler, save_path=config.save_path;
+	var tasks = [{
+	    from:Date.parse("2014-02-11T17:00:00.000Z"),
+	    to:Date.parse("2014-02-11T20:00:00.000Z"), 
+	    channel:314
+	},{
+	    from:Date.parse("2014-02-11T20:00:00.000Z"),
+	    to:Date.parse("2014-02-11T22:00:00.000Z"), 
+	    channel:215
+	},{
+	    from:Date.parse("2014-02-11T14:00:00.000Z"),
+	    to:Date.parse("2014-02-11T17:00:00.000Z"),
+	    channel:182
+	},{
+	    from:Date.parse("2014-02-11T14:00:00.000Z"),
+	    to:Date.parse("2014-02-11T22:00:00.000Z"),
+	    channel:111
+	}];
 	before(function(done){
 		if(fs.existsSync(save_path))
             fs.unlinkSync(save_path);
         scheduler = Scheduler(save_path,done);
     });        
-	describe('#add', function() {       
-		var tasks = [{
-		    from:Date.parse("2014-02-11T17:00:00.000Z"),
-		    to:Date.parse("2014-02-11T20:00:00.000Z"), 
-		    channel:314
-		},{
-		    from:Date.parse("2014-02-11T20:00:00.000Z"),
-		    to:Date.parse("2014-02-11T22:00:00.000Z"), 
-		    channel:215
-		},{
-		    from:Date.parse("2014-02-11T14:00:00.000Z"),
-		    to:Date.parse("2014-02-11T17:00:00.000Z"),
-		    channel:182
-		},{
-		    from:Date.parse("2014-02-11T14:00:00.000Z"),
-		    to:Date.parse("2014-02-11T22:00:00.000Z"),
-		    channel:111
-		}];
+	describe('#add', function() {       		
 		var bad_tasks = [{
 			//from > to
 		    from:Date.parse("2014-02-11T20:00:00.000Z"), 
@@ -73,7 +73,7 @@ describe('Scheduler', function() {
 		});
 		it('should add a task t3 with 3 conflicts', function(done){
 			scheduler.add(tasks[3],function(result){
-				result.should.be.eql({id:3,conflicts:[0,1,2]});
+				result.should.be.eql({id:3,conflicts:[tasks[0],tasks[1],tasks[2]]});
 				done();
 			});
 		});
@@ -108,7 +108,7 @@ describe('Scheduler', function() {
 		});
 		it('should return 2 tasks at 2014-02-11 14:00:00.000', function(done){			
 			scheduler.query(Date.parse("2014-02-11T14:00:00.000Z"),function(results){					
-                results.should.containDeep([2,3]);
+                results.should.containDeep([tasks[2],tasks[3]]);
                 done();
             },function(){
             	throw "should not get here";
@@ -116,7 +116,7 @@ describe('Scheduler', function() {
 		});
 		it('should return 2 tasks at 2014-02-11 17:00:00.000', function(done){			
 			scheduler.query(Date.parse("2014-02-11T17:00:00.000Z"),function(results){					
-                results.should.containDeep([0,3]);
+                results.should.containDeep([tasks[0],tasks[3]]);
                 done();
             },function(){
             	throw "should not get here";
@@ -124,7 +124,7 @@ describe('Scheduler', function() {
 		});
 		it('should return 2 tasks at 2014-02-11 20:00:00.000', function(done){			
 			scheduler.query(Date.parse("2014-02-11T20:00:00.000Z"),function(results){					
-                results.should.containDeep([1,3]);
+                results.should.containDeep([tasks[1],tasks[3]]);
                 done();
             },function(){
             	throw "should not get here";
