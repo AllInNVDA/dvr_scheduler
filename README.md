@@ -2,34 +2,27 @@
 
 This project is...
 
+## Stack & Tool
 
-## Getting Started
+[ExpressJS](http://expressjs.com/): power RESTful APIs
+[AngularJS](https://angularjs.org/): build the client app (not started)
+[Interval-Query](https://github.com/toberndo/interval-query): hold schedule data
+[Grunt](http://gruntjs.com/): manage project tasks
+[Mocha](http://visionmedia.github.io/mocha/): unit & integration test
+[istanbul](http://gotwarlost.github.io/istanbul/): coverage report
+[protractor](https://github.com/angular/protractor): end to end test (not started)
+[supertest](https://github.com/visionmedia/supertest): test RESTful APIs
+[groc](https://github.com/nevir/groc): documentation
 
-To get you started you can simply clone the repository and install the dependencies:
-
-### Prerequisites
-
-You need git to clone the repository. You can get it from
-[http://git-scm.com/](http://git-scm.com/).
-
-You must have node.js and its package manager (npm) installed.  You can get them from [http://nodejs.org/](http://nodejs.org/).
-
-### Clone the repository
-
-Clone the repository using [git][git]:
-
+## Setup
 ```
-git clone https://github.com/...
+git clone https://github.com/GPRN/dvr_scheduler.git
 cd dvr_scheduler
-```
-
-### Install Dependencies
-
-```
+npm install -g grunt-cli
 npm install
 ```
 
-### Run the Test
+## Run the Test
 
 unit test:
 ```
