@@ -53,10 +53,8 @@ describe('Sample Tests', function() {
             );  
         }               
         add_task(0,function(){
-            scheduler.query([0,Date.parse("2020-01-01T00:00:00.000Z")],function(results){
-                results.should.be.eql([0,1,2]);
-                done();
-            },function(){});
+            scheduler.all().should.containDeep([{id:0},{id:1},{id:2}]);
+            done();
         });
     });
 

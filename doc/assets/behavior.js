@@ -6,43 +6,33 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
 
   tableOfContents = [
     {
-      "type": "folder",
+      "type": "file",
       "data": {
-        "path": "server",
-        "title": "server"
+        "language": {
+          "nameMatchers": [".js"],
+          "pygmentsLexer": "javascript",
+          "multiLineComment": ["/*", "*", "*/"],
+          "singleLineComment": ["//"],
+          "ignorePrefix": "}",
+          "foldPrefix": "^",
+          "name": "JavaScript"
+        },
+        "sourcePath": "/home/shuang/Projects/dvr_scheduler/server/scheduler.js",
+        "projectPath": "server/scheduler.js",
+        "targetPath": "scheduler",
+        "pageTitle": "scheduler",
+        "title": "scheduler"
       },
       "depth": 1,
-      "children": [
+      "outline": [
         {
-          "type": "file",
+          "type": "heading",
           "data": {
-            "language": {
-              "nameMatchers": [".js"],
-              "pygmentsLexer": "javascript",
-              "multiLineComment": ["/*", "*", "*/"],
-              "singleLineComment": ["//"],
-              "ignorePrefix": "}",
-              "foldPrefix": "^",
-              "name": "JavaScript"
-            },
-            "sourcePath": "D:\\Projects\\dvr_scheduler\\server\\scheduler.js",
-            "projectPath": "server\\scheduler.js",
-            "targetPath": "server\\scheduler",
-            "pageTitle": "server\\scheduler",
-            "title": "scheduler"
+            "level": 2,
+            "title": "DVR Scheduler",
+            "slug": "dvr-scheduler"
           },
-          "depth": 2,
-          "outline": [
-            {
-              "type": "heading",
-              "data": {
-                "level": 2,
-                "title": "DVR Scheduler",
-                "slug": "dvr-scheduler"
-              },
-              "depth": 2
-            }
-          ]
+          "depth": 2
         }
       ]
     }

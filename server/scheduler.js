@@ -14,16 +14,16 @@ var OPERATIONS = {
 
 /**
 * This is the interval tree based scheduler module
-*
+* @todo change the module to singleton
 * @public
 * @module scheduler
 * @type {function}
 */
 module.exports = function(save_path,done){
 	/**
-	* @description A lib called interval-query(https://github.com/toberndo/interval-query) is used as the interval data structure to provide quick data manipulation.
+	* @description A lib called [interval-query](https://github.com/toberndo/interval-query) is used as the internal data structure to hold all schedule data.
 	* But this lib is buggy and I've found a couple bugs for it. That's why I have to put this lib outside of the node_modules folder.  
-	* @todo verify its performance, write tests for it, find a better lib or implement interval tree by myself.
+	* @todo verify interval-query performance, write tests for it, find a better lib or implement interval tree by myself.
 	*/	
 	var intervals = new require('./lib/sequential').Sequential();
 	/**
@@ -35,7 +35,7 @@ module.exports = function(save_path,done){
 	var schedules = [] ;	
 
 	/**
-	* Add a schedule
+	* User calls this function to add a schedule
 	*
 	* @public
 	* @async
@@ -45,13 +45,18 @@ module.exports = function(save_path,done){
 	* @param {int} schedule.to the end time of the schedule in timestamp
 	* @param {int} schedule.channel the channel to record
 	* @param {function} next the callback function
-	* @param {function} err the error callback function
+	* @param {function} error the error callback function
 	*/
-	function add(schedule,next,err){
-		if(!validator.not_null(schedule)) return err("wrong arguments");
-		if(!validator.not_null(schedule.from,schedule.to, schedule.channel)) return err("wrong arguments");
-		if(!validator.is_number(schedule.from,schedule.to)) return err("wrong arguments");
-		if(schedule.from>=schedule.to) return err("wrong arguments");	
+	function add(schedule,next,error){
+		if(!validator.not_null(schedule)) return error("wrong arguments");
+		if(!validator.not_null(schedule.from,schedule.to, schedule.channel)) return error("wrong arguments");
+		if(!validator.is_number(schedule.from,schedule.to)) return error("wrong arguments");
+		if(schedule.from>=schedule.to) return error("wrong arguments");
+
+		/**
+		* There will be no conflict if one schedule starts at a time another schedule ends.
+		* So endpoints = false should be used here.
+		*/		
 		intervals.queryInterval(schedule.from, schedule.to,{endpoints:false,resultFn:function(conflicts){
 			var id = intervals.pushInterval(schedule.from, schedule.to);		
 			schedules[id] = schedule;		
@@ -65,47 +70,65 @@ module.exports = function(save_path,done){
 					id:id,
 					conflicts:_filter(conflicts)
 				});
-			},err);
+			},error);
 		}});
 	}
 
 	/**
-	* Search schedules by a time point or a time range
+	* DVR calls this function to know to what to do at the specified time
 	*
 	* @public
 	* @async
 	* @method query
-	* @param {int or ints} time a time point if a single integer is provided, or a time range if two integers are provided
+	* @param {int} time a time point
 	* @param {function} next the callback function
-	* @param {function} err the error callback function
+	* @param {function} error the error callback function
 	*/
-	function query(time,next,err){
-		if(typeof time === "number" )
-			intervals.queryPoint(time,function(intervals){
-				next(_filter(intervals,time));
-			});
-		else if(time.length && time.length ===2)
-			intervals.queryInterval(time[0],time[1],{endpoints:false, resultFn: function(intervals){
-				next(_filter(intervals));
-			}});
-		else
-			err("wrong arguments");
+	function query(time,next,error){
+		if(!validator.is_number(time)) return error("wrong arguments");
+		intervals.queryPoint(time,function(intervals){
+			next(_filter(intervals,time));
+		});
+		// if(typeof time === "number" )
+		// 	intervals.queryPoint(time,function(intervals){
+		// 		next(_filter(intervals,time));
+		// 	});
+		// else if(time.length && time.length ===2)
+		// 	intervals.queryInterval(time[0],time[1],{endpoints:true, resultFn: function(intervals){
+		// 		next(_filter(intervals,time[0]));
+		// 	}});
+		// else
+		// 	error("wrong arguments");
 	}
 
 	/**
-	* Remove a schedule by id
+	* return all schedules
+	*
+	* @public
+	* @method all
+	*/
+	function all(){
+		var i = 0 ;
+		return schedules.filter(function(schedule){
+			schedule.id = i++; 
+			return !schedule.removed
+		})
+	}
+
+	/**
+	* User calls this function remove a schedule by id
 	*
 	* @public
 	* @async
 	* @method remove
 	* @param {int} id the id of the schedule to be deleted
 	* @param {function} next the callback function
-	* @param {function} err the error callback function
+	* @param {function} error the error callback function
 	*/
-	function remove(id,next,err){		
-		if(!validator.not_null(id)) return err("id is null");
-		if(!validator.is_number(id)) return err(id + " is not a number");
-		if(!validator.not_null(schedules[id])) return err("cannot find the schedule");	
+	function remove(id,next,error){		
+		if(!validator.not_null(id)) return error("id is null");
+		if(!validator.is_number(id)) return error(id + " is not a number");
+		if(!validator.not_null(schedules[id])) return error("cannot find the schedule");	
 		/**
 		* For simplicity, the schedule is not physically removed. This also makes undo deletion very simple. 
 		* The drawback is that the DVR uses more memory. But how many recording tasks will be created in a person's life?
@@ -114,29 +137,39 @@ module.exports = function(save_path,done){
 		
 		_save_operation(OPERATIONS.REMOVE,id,function(){
 			return next && next(true);	
-		},err);
+		},error);
 		
 	}
 	
 	/**
-	* Filter out deleted schedules
-	* Filter out schedules that end at the specified time
+	* Filter out schedules that are marked as removed and end at the specified time
 	*
 	* @private	
 	* @method _filter
-	* @param {object}
-	* @param {int} 
+	* @param {[object]} intervals 	a list of intervals need to be filtered
+	* @param {int} time optional			any schedules that end on this time should be filtered
 	*/
 	function _filter(intervals,time){
 		var ids = [];
 		intervals.forEach(function(interval){
 			var schedule = schedules[interval.id];
-			if(schedule && !schedule.removed && (time==null||schedule.to>time))
+			if(schedule && !schedule.removed && schedule.to!=time)
 				ids.push(interval.id);
 		});
 		return ids;
 	}
 
+	/**
+	* Save a user operation to the binary file
+	*
+	* @private	
+	* @async
+	* @method _save_operation
+	* @param {int} operation 		an add or remove operation
+	* @param {object} data 			operation data
+	* @param {function} next the callback function
+	* @param {function} error the error callback function
+	*/
 	function _save_operation(operation,data,next,error){
 		var buf ,i = 0 ;
 		if(operation === OPERATIONS.ADD){
@@ -157,9 +190,11 @@ module.exports = function(save_path,done){
 	}
 
 	
-
-	fs.readFile(save_path, function (err, buf) {
-		if(!err){
+	/**
+	* Load saved schedule data
+	*/
+	fs.readFile(save_path, function (error, buf) {
+		if(!error){
 			var i = 0 ;
 			while(i<buf.length){
 				var operation = buf.readUInt8(i); i++;
@@ -180,6 +215,7 @@ module.exports = function(save_path,done){
 	});
 
 	return {
+		all:all,
 		add:add,
 		query:query,
 		remove:remove

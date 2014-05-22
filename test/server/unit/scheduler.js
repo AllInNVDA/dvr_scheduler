@@ -143,12 +143,8 @@ describe('Scheduler', function() {
 		it('should delete the task t0', function(done){
 			scheduler.remove(0,function(result){
 				result.should.be.eql(true);
-				scheduler.query([0,Date.parse("2020-01-01T00:00:00.000Z")],function(results){					
-	                results.should.not.containEql(0);
-	                done();
-	            },function(){
-	            	throw "should not get here";
-	            });				
+                scheduler.all().should.not.containEql({id:0});
+                done();
 			});
 		});
 		it('should give error when deleting nonexisting task', function(done){
@@ -171,12 +167,8 @@ describe('Scheduler', function() {
 	describe('#constructor',function(){
 		it('should load schedule data from the file',function(done){
 			var scheduler2 = Scheduler(save_path,function(){
-				scheduler2.query([0,Date.parse("2020-01-01T00:00:00.000Z")],function(results){					
-	                results.should.be.eql([1,2,3]);
-	                done();
-	            },function(err){
-	            	throw "should not get here: " + err;
-	            });					
+                scheduler2.all().should.containDeep([{id:1},{id:2},{id:3}]);
+                done();
 			});
 			
 		})
