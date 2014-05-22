@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = {
-    app: {
+	save_path: "data/schedule.bin",
+    app: {    	
         name: "DVR Scheduler - Production"
     }
 }

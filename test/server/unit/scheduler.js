@@ -1,9 +1,17 @@
 'use strict';
 
 var should = require('should'),
-    scheduler=require('../../../server/scheduler'); 
+	fs = require('fs'),
+	config=require('../../../config/config'),
+    Scheduler=require('../../../server/scheduler');  
 
-describe('Scheduler', function() {      
+describe('Scheduler', function() {     
+	var scheduler, save_path=config.save_path;
+	before(function(done){
+		if(fs.existsSync(save_path))
+            fs.unlinkSync(save_path);
+        scheduler = Scheduler(save_path,done);
+    });        
 	describe('#add', function() {       
 		var tasks = [{
 		    from:Date.parse("2014-02-11T17:00:00.000Z"),
@@ -130,8 +138,7 @@ describe('Scheduler', function() {
             	throw "should not get here";
             });
 		});
-	});
-	
+	});	
 	describe('#remove',function(){
 		it('should delete the task t0', function(done){
 			scheduler.remove(0,function(result){
@@ -161,4 +168,17 @@ describe('Scheduler', function() {
 			});
 		});
 	});
+	describe('#constructor',function(){
+		it('should load schedule data from the file',function(done){
+			var scheduler2 = Scheduler(save_path,function(){
+				scheduler2.query([0,Date.parse("2020-01-01T00:00:00.000Z")],function(results){					
+	                results.should.be.eql([1,2,3]);
+	                done();
+	            },function(err){
+	            	throw "should not get here: " + err;
+	            });					
+			});
+			
+		})
+	})
 });

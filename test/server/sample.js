@@ -1,7 +1,9 @@
 'use strict';
 
 var should = require('should'),
-    scheduler=require('../../server/scheduler'); 
+    fs = require('fs'),
+    config = require('../../config/config'),
+    Scheduler=require('../../server/scheduler'); 
 
 var tasks = [{
     from:Date.parse("2014-02-11T17:00:00.000Z"),
@@ -18,7 +20,13 @@ var tasks = [{
 }];
       
 
-describe('Sample Tests', function() {          
+describe('Sample Tests', function() {   
+    var scheduler, save_path=config.save_path;
+    before(function(done){
+        if(fs.existsSync(save_path))
+            fs.unlinkSync(save_path)
+        scheduler = Scheduler(save_path,done);
+    });       
     it('should add sample tasks', function(done) {
         var expects = [{
                 id:0,conflicts:[]},
@@ -33,12 +41,14 @@ describe('Sample Tests', function() {
             var task = tasks[idx];
             scheduler.add(                
                 task,
-                function(results){
-                    results.should.be.eql(expects[idx]); 
+                function(result){
+                    result.should.be.eql(expects[idx]); 
                     if(idx<tasks.length-1)
                         add_task(idx+1,next);
                     else
                         next();
+                },function(err){
+                    throw err ;
                 }
             );  
         }               

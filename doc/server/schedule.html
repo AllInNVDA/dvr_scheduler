@@ -1,0 +1,52 @@
+<!DOCTYPE html><html lang="en"><head><title>server\schedule</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content="../"><meta name="groc-document-path" content="server\schedule"><meta name="groc-project-path" content="server\schedule.js"><link rel="stylesheet" type="text/css" media="all" href="../assets/style.css"><script type="text/javascript" src="../assets/behavior.js"></script><body><div id="meta"><div class="file-path">server\schedule.js</div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h2 id="a-restful-wrapper-of-schedulerjs">A restful wrapper of scheduler.js</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper"><span class="s1">&#39;use strict&#39;</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private</span></p>
+
+<p>Formats error message.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>err must be an Object.</strong><br/>(the raw error object)</li>
+</ul>
+
+<p><strong>Returns an Object</strong><br/>(the formated error object)</p>
+
+<p>Example:</p>
+
+<pre><code>errorize("this is an error.");
+errorize({CriticalError:"cannot find the disk"});
+</code></pre></div></div><div class="code"><div class="wrapper"><span class="kd">function</span> <span class="nx">errorize</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+  <span class="k">return</span> <span class="p">{</span><span class="nx">error</span><span class="o">:</span> <span class="nx">err</span><span class="p">};</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method create is asynchronous</span></p>
+
+<p>Creates a scheduler restfully.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>req must be an Object.</strong><br/>(the request object)</p></li>
+<li><p><strong>res must be an Object.</strong><br/>(the response object)</p></li>
+<li><p><strong>next must be a Function.</strong><br/>(the callback function)</p></li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="nx">create</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">){</span>  
+  <span class="nx">req</span><span class="p">.</span><span class="nx">scheduler</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">body</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">){</span>
+    <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="nx">result</span><span class="p">);</span>
+  <span class="p">},</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+    <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span><span class="nx">errorize</span><span class="p">(</span><span class="nx">err</span><span class="p">));</span>
+  <span class="p">});</span>
+<span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method delete is asynchronous</span></p>
+
+<p>Deletes a scheduler restfully.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>req must be an Object.</strong><br/>(the request object)</p></li>
+<li><p><strong>res must be an Object.</strong><br/>(the response object)</p></li>
+<li><p><strong>next must be a Function.</strong><br/>(the callback function)</p></li>
+</ul></div></div><div class="code"><div class="wrapper"><span class="nx">exports</span><span class="p">.</span><span class="k">delete</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">){</span>  
+  <span class="nx">req</span><span class="p">.</span><span class="nx">scheduler</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="o">+</span><span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">result</span><span class="p">){</span>
+    <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+  <span class="p">},</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">){</span>
+    <span class="k">return</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span><span class="nx">errorize</span><span class="p">(</span><span class="nx">err</span><span class="p">));</span>
+  <span class="p">});</span>
+<span class="p">}</span></div></div></div></div></body></html>

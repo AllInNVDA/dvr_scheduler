@@ -38,21 +38,21 @@ module.exports = function(grunt) {
         }
       },
     },
-    // env: {
-    //   test: {
-    //     NODE_ENV: 'test'
-    //   },
-    //   dev: {
-    //     NODE_ENV: 'development'
-    //   }
-    // },
+    env: {
+      test: {
+        NODE_ENV: 'test'
+      },
+      dev: {
+        NODE_ENV: 'development'
+      }
+    },
     // nodemon: {      
     //   script: 'server.js'      
     // }
   });
   grunt.registerTask('test', function() {
     return grunt.task.run([        
-        // 'env:test',        
+        'env:test',        
         'mochaTest'        
       ]);
   });  

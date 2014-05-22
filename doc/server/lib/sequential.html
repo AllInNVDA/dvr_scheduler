@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en"><head><title>server\lib\sequential</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content="../../"><meta name="groc-document-path" content="server\lib\sequential"><meta name="groc-project-path" content="server\lib\sequential.js"><link rel="stylesheet" type="text/css" media="all" href="../../assets/style.css"><script type="text/javascript" src="../../assets/behavior.js"></script><body><div id="meta"><div class="file-path">server\lib\sequential.js</div></div><div id="document"><div class="segment"></div><div class="segment"><div class="comments "><div class="wrapper"><p>interval-query
+Copyright © 2012, Thomas Oberndörfer <a href="&#109;a&#x69;&#108;&#x74;&#x6f;:&#x74;&#111;&#x62;&#x65;&#114;&#110;&#x64;&#x6f;&#x40;&#x79;&#97;&#x72;&#107;&#x6f;&#x6e;&#x2e;&#100;&#101;">&#x74;&#111;&#x62;&#x65;&#114;&#110;&#x64;&#x6f;&#x40;&#x79;&#97;&#x72;&#107;&#x6f;&#x6e;&#x2e;&#100;&#101;</a>
+MIT Licensed</p></div></div><div class="code"><div class="wrapper"><span class="kd">var</span> <span class="nx">intervals</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./intervals&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">_intervals</span> <span class="o">=</span> <span class="p">[];</span>
+
+<span class="kd">function</span> <span class="nx">Sequential</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="k">this</span> <span class="k">instanceof</span> <span class="nx">Sequential</span><span class="p">))</span> <span class="k">return</span> <span class="k">new</span> <span class="nx">Sequential</span><span class="p">;</span>
+  <span class="nx">intervals</span><span class="p">.</span><span class="nx">IntervalStack</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">_intervals</span><span class="p">,</span> <span class="nx">_queryInterval</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nx">Sequential</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">intervals</span><span class="p">.</span><span class="nx">IntervalStack</span><span class="p">(</span><span class="nx">_intervals</span><span class="p">,</span> <span class="nx">_queryInterval</span><span class="p">);</span>
+
+<span class="nx">Sequential</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">constructor</span> <span class="o">=</span> <span class="nx">Sequential</span><span class="p">;</span>
+<span class="nx">Sequential</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">queryOverlap</span> <span class="o">=</span> <span class="nx">queryOverlap</span><span class="p">;</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">.</span><span class="nx">Sequential</span> <span class="o">=</span> <span class="nx">Sequential</span><span class="p">;</span>
+
+<span class="kd">function</span> <span class="nx">_query</span><span class="p">(</span><span class="nx">queryIntervals</span><span class="p">,</span> <span class="nx">hits</span><span class="p">,</span> <span class="nx">disjointFn</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">queryIntervals</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">queryInterval</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">_intervals</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">interval</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">disjointFn</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">interval</span><span class="p">,</span> <span class="nx">queryInterval</span><span class="p">)</span> <span class="o">!==</span> <span class="nx">intervals</span><span class="p">.</span><span class="nx">Interval</span><span class="p">.</span><span class="kr">const</span><span class="p">.</span><span class="nx">DISJOINT</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">hits</span><span class="p">[</span><span class="nx">interval</span><span class="p">.</span><span class="nx">id</span><span class="p">]</span> <span class="o">=</span> <span class="nx">interval</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">});</span> 
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">_queryInterval</span><span class="p">(</span><span class="nx">intervalArray</span><span class="p">,</span> <span class="nx">resultFn</span><span class="p">,</span> <span class="nx">disjointFn</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">hits</span> <span class="o">=</span> <span class="p">{};</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">disjointFn</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="nx">disjointFn</span> <span class="o">=</span> <span class="nx">intervals</span><span class="p">.</span><span class="nx">Interval</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">disjointIncl</span><span class="p">;</span>
+  <span class="nx">_query</span><span class="p">(</span><span class="nx">intervalArray</span><span class="p">,</span> <span class="nx">hits</span><span class="p">,</span> <span class="nx">disjointFn</span><span class="p">);</span>
+  <span class="kd">var</span> <span class="nx">intervalArray</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">hits</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">hits</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+  <span class="p">});</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">resultFn</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="k">typeof</span> <span class="nx">resultFn</span> <span class="o">===</span> <span class="s1">&#39;function&#39;</span><span class="p">)</span> <span class="nx">resultFn</span><span class="p">(</span><span class="nx">intervalArray</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">intervalArray</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">_queryOverlap</span><span class="p">(</span><span class="nx">disjointFn</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">_intervals</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">h</span> <span class="o">=</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">h</span> <span class="o">&lt;</span> <span class="nx">_intervals</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">h</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">disjointFn</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">_intervals</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">_intervals</span><span class="p">[</span><span class="nx">h</span><span class="p">])</span> <span class="o">!==</span> <span class="nx">intervals</span><span class="p">.</span><span class="nx">Interval</span><span class="p">.</span><span class="kr">const</span><span class="p">.</span><span class="nx">DISJOINT</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">_intervals</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">overlap</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">_intervals</span><span class="p">[</span><span class="nx">h</span><span class="p">].</span><span class="nx">id</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+        <span class="nx">_intervals</span><span class="p">[</span><span class="nx">h</span><span class="p">].</span><span class="nx">overlap</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">_intervals</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="kd">function</span> <span class="nx">queryOverlap</span><span class="p">()</span> <span class="p">{</span>
+  <span class="nx">_intervals</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">interval</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">interval</span><span class="p">.</span><span class="nx">overlap</span> <span class="o">=</span> <span class="p">[];</span>
+  <span class="p">});</span>
+  <span class="nx">_queryOverlap</span><span class="p">(</span><span class="nx">intervals</span><span class="p">.</span><span class="nx">Interval</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">disjointIncl</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">_intervals</span><span class="p">;</span>
+<span class="p">}</span></div></div></div></div></body></html>

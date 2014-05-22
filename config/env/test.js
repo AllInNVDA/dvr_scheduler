@@ -2,7 +2,8 @@
 
 module.exports = {
     port: 3002,
-    app: {
+    save_path: "data/test_schedule.bin",
+    app: {    	
         name: "DVR Scheduler - Test"
     }
 }

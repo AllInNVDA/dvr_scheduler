@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="en"><head><title>server\scheduler</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content="../"><meta name="groc-document-path" content="server\scheduler"><meta name="groc-project-path" content="server\scheduler.js"><link rel="stylesheet" type="text/css" media="all" href="../assets/style.css"><script type="text/javascript" src="../assets/behavior.js"></script><body><div id="meta"><div class="file-path">server\scheduler.js</div></div><div id="document"><div class="segment"><div class="comments "><div class="wrapper"><h2 id="dvr-scheduler">DVR Scheduler</h2></div></div></div><div class="segment"><div class="code"><div class="wrapper"><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+  <span class="nx">validator</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;./validator&quot;</span><span class="p">);</span>
+
+<span class="kd">var</span> <span class="nx">OPERATIONS</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">ADD</span><span class="o">:</span><span class="mi">1</span><span class="p">,</span>
+  <span class="nx">REMOVE</span><span class="o">:</span><span class="mi">2</span>
+<span class="p">};</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public module scheduler of type <em>function</em></span></p>
+
+<p>This is the interval tree based scheduler module</p></div></div><div class="code"><div class="wrapper"><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">save_path</span><span class="p">,</span><span class="nx">done</span><span class="p">){</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>A lib called interval-query(https://github.com/toberndo/interval-query) is used as the interval data structure to provide quick data manipulation.
+But this lib is buggy and I've found a couple bugs for it. That's why I have to put this lib outside of the node_modules folder.  </p>
+
+<p>TODO: verify its performance, write tests for it, find a better lib or implement interval tree by myself.</p></div></div><div class="code"><div class="wrapper">  
+  <span class="kd">var</span> <span class="nx">intervals</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/sequential&#39;</span><span class="p">).</span><span class="nx">Sequential</span><span class="p">();</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>There is a bug in interval-query. Everytime a Sequential is created, the interval id won't get reset. 
+To reset the id, intervals.clearIntervalStack() must be called.</p></div></div><div class="code"><div class="wrapper">  <span class="nx">intervals</span><span class="p">.</span><span class="nx">clearIntervalStack</span><span class="p">();</span>
+  
+  <span class="kd">var</span> <span class="nx">schedules</span> <span class="o">=</span> <span class="p">[]</span> <span class="p">;</span>  </div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method add is asynchronous</span></p>
+
+<p>Add a schedule</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>schedule must be an object.</strong><br/>(the schedule object contains three properties: from, to and channel)</p>
+
+<ul><li><p><strong>schedule.from must be an int.</strong><br/>(the start time of the schedule in timestamp)</p></li>
+<li><p><strong>schedule.to must be an int.</strong><br/>(the end time of the schedule in timestamp)</p></li>
+<li><p><strong>schedule.channel must be an int.</strong><br/>(the channel to record)</p></li></ul></li>
+<li><p><strong>next must be a function.</strong><br/>(the callback function)</p></li>
+<li><p><strong>err must be a function.</strong><br/>(the error callback function)</p></li>
+</ul></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">add</span><span class="p">(</span><span class="nx">schedule</span><span class="p">,</span><span class="nx">next</span><span class="p">,</span><span class="nx">err</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">validator</span><span class="p">.</span><span class="nx">not_null</span><span class="p">(</span><span class="nx">schedule</span><span class="p">))</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;wrong arguments&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">validator</span><span class="p">.</span><span class="nx">not_null</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">,</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">channel</span><span class="p">))</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;wrong arguments&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">validator</span><span class="p">.</span><span class="nx">is_number</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">))</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;wrong arguments&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="o">&gt;=</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">)</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;wrong arguments&quot;</span><span class="p">);</span> 
+    <span class="nx">intervals</span><span class="p">.</span><span class="nx">queryInterval</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">,{</span><span class="nx">endpoints</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span><span class="nx">resultFn</span><span class="o">:</span><span class="kd">function</span><span class="p">(</span><span class="nx">conflicts</span><span class="p">){</span>
+      <span class="kd">var</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">intervals</span><span class="p">.</span><span class="nx">pushInterval</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">);</span>    
+      <span class="nx">schedules</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span> <span class="o">=</span> <span class="nx">schedule</span><span class="p">;</span>   </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>A DVR can stop working for any reason. So the schedule data must be save somewhere presistently and restored once the DVR restarts.
+See Issue #2 and #3. Currently, add and delete operations are appended to a local file through saveoperation function</p></div></div><div class="code"><div class="wrapper">  
+      <span class="nx">_save_operation</span><span class="p">(</span><span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">ADD</span><span class="p">,</span><span class="nx">schedule</span><span class="p">,</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="k">return</span> <span class="nx">next</span> <span class="o">&amp;&amp;</span> <span class="nx">next</span><span class="p">({</span>
+          <span class="nx">id</span><span class="o">:</span><span class="nx">id</span><span class="p">,</span>
+          <span class="nx">conflicts</span><span class="o">:</span><span class="nx">_filter</span><span class="p">(</span><span class="nx">conflicts</span><span class="p">)</span>
+        <span class="p">});</span>
+      <span class="p">},</span><span class="nx">err</span><span class="p">);</span>
+    <span class="p">}});</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method query is asynchronous</span></p>
+
+<p>Search schedules by a time point or a time range</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>time must be an int or ints.</strong><br/>(a time point if a single integer is provided, or a time range if two integers are provided)</p></li>
+<li><p><strong>next must be a function.</strong><br/>(the callback function)</p></li>
+<li><p><strong>err must be a function.</strong><br/>(the error callback function)</p></li>
+</ul></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">query</span><span class="p">(</span><span class="nx">time</span><span class="p">,</span><span class="nx">next</span><span class="p">,</span><span class="nx">err</span><span class="p">){</span>
+    <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">time</span> <span class="o">===</span> <span class="s2">&quot;number&quot;</span> <span class="p">)</span>
+      <span class="nx">intervals</span><span class="p">.</span><span class="nx">queryPoint</span><span class="p">(</span><span class="nx">time</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">intervals</span><span class="p">){</span>
+        <span class="nx">next</span><span class="p">(</span><span class="nx">_filter</span><span class="p">(</span><span class="nx">intervals</span><span class="p">,</span><span class="nx">time</span><span class="p">));</span>
+      <span class="p">});</span>
+    <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">length</span> <span class="o">&amp;&amp;</span> <span class="nx">time</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span><span class="mi">2</span><span class="p">)</span>
+      <span class="nx">intervals</span><span class="p">.</span><span class="nx">queryInterval</span><span class="p">(</span><span class="nx">time</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nx">time</span><span class="p">[</span><span class="mi">1</span><span class="p">],{</span><span class="nx">endpoints</span><span class="o">:</span><span class="kc">false</span><span class="p">,</span> <span class="nx">resultFn</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">intervals</span><span class="p">){</span>
+        <span class="nx">next</span><span class="p">(</span><span class="nx">_filter</span><span class="p">(</span><span class="nx">intervals</span><span class="p">));</span>
+      <span class="p">}});</span>
+    <span class="k">else</span>
+      <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;wrong arguments&quot;</span><span class="p">);</span>
+  <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method remove is asynchronous</span></p>
+
+<p>Remove a schedule by id</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>id must be an int.</strong><br/>(the id of the schedule to be deleted)</p></li>
+<li><p><strong>next must be a function.</strong><br/>(the callback function)</p></li>
+<li><p><strong>err must be a function.</strong><br/>(the error callback function)</p></li>
+</ul></div></div><div class="code"><div class="wrapper">  <span class="kd">function</span> <span class="nx">remove</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="nx">next</span><span class="p">,</span><span class="nx">err</span><span class="p">){</span>   
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">validator</span><span class="p">.</span><span class="nx">not_null</span><span class="p">(</span><span class="nx">id</span><span class="p">))</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;id is null&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">validator</span><span class="p">.</span><span class="nx">is_number</span><span class="p">(</span><span class="nx">id</span><span class="p">))</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="nx">id</span> <span class="o">+</span> <span class="s2">&quot; is not a number&quot;</span><span class="p">);</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">validator</span><span class="p">.</span><span class="nx">not_null</span><span class="p">(</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">id</span><span class="p">]))</span> <span class="k">return</span> <span class="nx">err</span><span class="p">(</span><span class="s2">&quot;cannot find the schedule&quot;</span><span class="p">);</span>  </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>For simplicity, the schedule is not physically removed. This also makes undo deletion very simple. 
+The drawback is that the DVR uses more memory. But how many recording tasks will be created in a person's life?</p></div></div><div class="code"><div class="wrapper">    <span class="nx">schedules</span><span class="p">[</span><span class="nx">id</span><span class="p">].</span><span class="nx">removed</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+    
+    <span class="nx">_save_operation</span><span class="p">(</span><span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">REMOVE</span><span class="p">,</span><span class="nx">id</span><span class="p">,</span><span class="kd">function</span><span class="p">(){</span>
+      <span class="k">return</span> <span class="nx">next</span> <span class="o">&amp;&amp;</span> <span class="nx">next</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>  
+    <span class="p">},</span><span class="nx">err</span><span class="p">);</span>
+    
+  <span class="p">}</span>
+
+  <span class="c1">//filter does two thing:</span>
+  <span class="c1">//1) filter out deleted schedules</span>
+  <span class="c1">//2) filter out a schedule ends at the specified time</span>
+  <span class="kd">function</span> <span class="nx">_filter</span><span class="p">(</span><span class="nx">intervals</span><span class="p">,</span><span class="nx">time</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">ids</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="nx">intervals</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">interval</span><span class="p">){</span>
+      <span class="kd">var</span> <span class="nx">schedule</span> <span class="o">=</span> <span class="nx">schedules</span><span class="p">[</span><span class="nx">interval</span><span class="p">.</span><span class="nx">id</span><span class="p">];</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">schedule</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">removed</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">time</span><span class="o">==</span><span class="kc">null</span><span class="o">||</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="o">&gt;</span><span class="nx">time</span><span class="p">))</span>
+        <span class="nx">ids</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">interval</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+    <span class="p">});</span>
+    <span class="k">return</span> <span class="nx">ids</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kd">function</span> <span class="nx">_save_operation</span><span class="p">(</span><span class="nx">operation</span><span class="p">,</span><span class="nx">data</span><span class="p">,</span><span class="nx">next</span><span class="p">,</span><span class="nx">error</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">buf</span> <span class="p">,</span><span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">operation</span> <span class="o">===</span> <span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">ADD</span><span class="p">){</span>
+      <span class="nx">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="mi">19</span><span class="p">);</span>
+      <span class="nx">buf</span><span class="p">.</span><span class="nx">writeUInt8</span><span class="p">(</span><span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">ADD</span><span class="p">,</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">;</span>
+      <span class="nx">buf</span><span class="p">.</span><span class="nx">writeDoubleLE</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">8</span><span class="p">;</span> 
+      <span class="nx">buf</span><span class="p">.</span><span class="nx">writeDoubleLE</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">to</span><span class="p">,</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">8</span><span class="p">;</span> 
+      <span class="nx">buf</span><span class="p">.</span><span class="nx">writeUInt16LE</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">channel</span><span class="p">,</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">operation</span> <span class="o">===</span> <span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">REMOVE</span><span class="p">){</span>
+      <span class="nx">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+      <span class="nx">buf</span><span class="p">.</span><span class="nx">writeUInt8</span><span class="p">(</span><span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">REMOVE</span><span class="p">,</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">;</span>
+      <span class="nx">buf</span><span class="p">.</span><span class="nx">writeUInt32LE</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">4</span><span class="p">;</span>        
+    <span class="p">}</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">appendFile</span><span class="p">(</span><span class="nx">save_path</span><span class="p">,</span> <span class="nx">buf</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="k">return</span> <span class="nx">error</span> <span class="o">&amp;&amp;</span> <span class="nx">error</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">next</span> <span class="o">&amp;&amp;</span> <span class="nx">next</span><span class="p">();</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  
+
+  <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="nx">save_path</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">buf</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">err</span><span class="p">){</span>
+      <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">;</span>
+      <span class="k">while</span><span class="p">(</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">buf</span><span class="p">.</span><span class="nx">length</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">operation</span> <span class="o">=</span> <span class="nx">buf</span><span class="p">.</span><span class="nx">readUInt8</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">operation</span> <span class="o">===</span> <span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">ADD</span><span class="p">){</span>
+          <span class="kd">var</span> <span class="nx">from</span> <span class="o">=</span> <span class="nx">buf</span><span class="p">.</span><span class="nx">readDoubleLE</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">8</span><span class="p">;</span> 
+          <span class="kd">var</span> <span class="nx">to</span> <span class="o">=</span> <span class="nx">buf</span><span class="p">.</span><span class="nx">readDoubleLE</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">8</span><span class="p">;</span> 
+          <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">buf</span><span class="p">.</span><span class="nx">readUInt16LE</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">2</span><span class="p">;</span>
+          <span class="kd">var</span> <span class="nx">schedule</span> <span class="o">=</span> <span class="p">{</span><span class="nx">from</span><span class="o">:</span><span class="nx">from</span><span class="p">,</span><span class="nx">to</span><span class="o">:</span><span class="nx">to</span><span class="p">,</span><span class="nx">channel</span><span class="o">:</span><span class="nx">channel</span><span class="p">};</span>
+          <span class="kd">var</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">intervals</span><span class="p">.</span><span class="nx">pushInterval</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">);</span>            
+          <span class="nx">schedules</span><span class="p">[</span><span class="nx">id</span><span class="p">]</span> <span class="o">=</span> <span class="nx">schedule</span><span class="p">;</span>         
+        <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">operation</span> <span class="o">===</span> <span class="nx">OPERATIONS</span><span class="p">.</span><span class="nx">REMOVE</span><span class="p">){</span>
+          <span class="kd">var</span> <span class="nx">id</span> <span class="o">=</span> <span class="nx">buf</span><span class="p">.</span><span class="nx">readUInt32LE</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span> <span class="nx">i</span><span class="o">+=</span><span class="mi">4</span><span class="p">;</span>         
+          <span class="nx">schedules</span><span class="p">[</span><span class="nx">id</span><span class="p">].</span><span class="nx">removed</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span> 
+    <span class="nx">done</span><span class="p">();</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="nx">add</span><span class="o">:</span><span class="nx">add</span><span class="p">,</span>
+    <span class="nx">query</span><span class="o">:</span><span class="nx">query</span><span class="p">,</span>
+    <span class="nx">remove</span><span class="o">:</span><span class="nx">remove</span>
+  <span class="p">};</span>
+<span class="p">}</span></div></div></div></div></body></html>
