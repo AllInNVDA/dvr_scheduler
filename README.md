@@ -2,11 +2,11 @@
 
 This project is...
 
-## Stack & Tool
+## Stack & Tools
 
 [ExpressJS](http://expressjs.com/): to power RESTful APIs and the client app
 
-[AngularJS](https://angularjs.org/): to build the client app (not started)
+[AngularJS](https://angularjs.org/): to build the client app
 
 [Interval-Query](https://github.com/toberndo/interval-query): to hold schedule data
 
@@ -48,4 +48,8 @@ grunt cov
 coverage test files that start with "sam":
 ```
 grunt cov --file=sam
+```
+## Run the client app
+```
+grunt serve
 ```
