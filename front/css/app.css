@@ -64,6 +64,12 @@ body {
   font-weight: bold;
   font-family: 'arial', 'sans-serif';
 }
+td.up_arrow{
+  background: url("http://www.clipartbest.com/cliparts/RcA/6gx/RcA6gx6ji.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 
 /** Detail View **/
 /*img.phone {

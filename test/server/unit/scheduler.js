@@ -97,8 +97,12 @@ describe('Scheduler', function() {
 		    add_bad_task(0);
 		});
 	});
-	describe('#point query',function(){
-		it('should return 0 task at 2014-02-11 13:59:59.999', function(done){			
+	describe('#point query - 1 tuner',function(){		
+		before(function(done){
+			scheduler.set_tuner_count(1);
+			done();
+		})
+		it('should return 0 task at 2014-02-11 13:59:59.999', function(done){				
 			scheduler.query(Date.parse("2014-02-11T13:59:59.999Z"),function(results){					
                 results.should.eql([]);
                 done();
@@ -106,17 +110,65 @@ describe('Scheduler', function() {
             	throw "should not get here";
             });
 		});
-		it('should return 2 tasks at 2014-02-11 14:00:00.000', function(done){			
+		it('should return 1 task with highest priority at 2014-02-11 14:00:00.000', function(done){						
+			scheduler.prioritize(3,2);
 			scheduler.query(Date.parse("2014-02-11T14:00:00.000Z"),function(results){					
-                results.should.containDeep([tasks[2],tasks[3]]);
+                results.should.containDeep([tasks[3].channel]);
                 done();
             },function(){
             	throw "should not get here";
             });
 		});
-		it('should return 2 tasks at 2014-02-11 17:00:00.000', function(done){			
+		it('should return 1 task with highest priority at 2014-02-11 17:00:00.000', function(done){			
+			scheduler.prioritize(0,1);
 			scheduler.query(Date.parse("2014-02-11T17:00:00.000Z"),function(results){					
-                results.should.containDeep([tasks[0],tasks[3]]);
+                results.should.containDeep([tasks[0].channel]);
+                done();
+            },function(){
+            	throw "should not get here";
+            });
+		});
+		it('should return 1 task with highest priority at 2014-02-11 20:00:00.000', function(done){			
+			scheduler.query(Date.parse("2014-02-11T20:00:00.000Z"),function(results){					
+                results.should.containDeep([tasks[3].channel]);
+                done();
+            },function(){
+            	throw "should not get here";
+            });
+		});
+		it('should return 0 task at 2014-02-11 22:00:00.000', function(done){			
+			scheduler.query(Date.parse("2014-02-11T22:00:00.000Z"),function(results){					
+                results.should.containDeep([]);
+                done();
+            },function(){
+            	throw "should not get here";
+            });
+		});
+	});	
+	describe('#point query - 2 tuners',function(){		
+		before(function(done){
+			scheduler.set_tuner_count(2);
+			done();
+		})
+		it('should return 0 task at 2014-02-11 13:59:59.999', function(done){				
+			scheduler.query(Date.parse("2014-02-11T13:59:59.999Z"),function(results){					
+                results.should.eql([]);
+                done();
+            },function(){
+            	throw "should not get here";
+            });
+		});
+		it('should return 2 tasks sorted by their priorities at 2014-02-11 14:00:00.000', function(done){						
+			scheduler.query(Date.parse("2014-02-11T14:00:00.000Z"),function(results){					
+                results.should.containDeep([tasks[3].channel,tasks[2].channel]);
+                done();
+            },function(){
+            	throw "should not get here";
+            });
+		});
+		it('should return 2 tasks sorted by their priorities at 2014-02-11 17:00:00.000', function(done){			
+			scheduler.query(Date.parse("2014-02-11T17:00:00.000Z"),function(results){					
+                results.should.containDeep([tasks[0].channel,tasks[3].channel]);
                 done();
             },function(){
             	throw "should not get here";
@@ -124,7 +176,7 @@ describe('Scheduler', function() {
 		});
 		it('should return 2 tasks at 2014-02-11 20:00:00.000', function(done){			
 			scheduler.query(Date.parse("2014-02-11T20:00:00.000Z"),function(results){					
-                results.should.containDeep([tasks[1],tasks[3]]);
+                results.should.containDeep([tasks[3].channel,tasks[1].channel]);
                 done();
             },function(){
             	throw "should not get here";

@@ -118,7 +118,6 @@ module.exports = function(save_path,done){
 	}
 
 	function add_array(schedules,next,error){
-		console.log(schedules)
 		if(!Array.isArray(schedules)) return error("the first parameter is not an array.");
 		var results = [];
 		function add_one(idx){
@@ -146,7 +145,20 @@ module.exports = function(save_path,done){
 	function query(time,next,error){
 		if(!validator.is_number(time)) return error("wrong arguments");
 		intervals.queryPoint(time,function(intervals){
-			next(_process_conflicts(intervals,time));
+			var conflicts = _process_conflicts(intervals,time);
+
+			/**
+			* Must delete null and NaN, otherwise they will appear at the top
+			*/
+			var channels = conflicts.sort(function(a,b){
+				if(a.priority === null || isNaN(a.priority))
+					return 1
+				if(b.priority === null || isNaN(b.priority))
+					return -1
+				return a.priority-b.priority
+			}).slice(0,number_of_tuners).map(function(conflict){return conflict.channel});
+			next(channels);
+			//
 		});
 	}
 
@@ -184,6 +196,7 @@ module.exports = function(save_path,done){
 		* The drawback is that the DVR uses more memory. But how many recording tasks will be created in a person's life?
 		*/
 		schedules[id].removed = true;
+		delete schedules[id].priority;
 		
 		_save_operation(OPERATIONS.REMOVE,id,function(){
 			return next && next(true);	

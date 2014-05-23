@@ -2,8 +2,22 @@
 
 var dvrControllers = angular.module('dvrControllers', []);
 
-dvrControllers.controller('ScheduleController', ['$scope', 'Program', 'Schedule',
-  function($scope, Program,Schedule) {
+dvrControllers.controller('ScheduleController', ['$route', '$q', '$scope', 'Program', 'Schedule',
+  function($route,$q, $scope, Program,Schedule) {
+  	function find_program(channel,from,to){
+  		for(var j=0 ; j<$scope.programs.length; j ++){    				    				
+  			var program = $scope.programs[j];
+			if(program.channel === channel){
+				var schedules = program.schedules;
+				for(var k=0 ; k<schedules.length ; k++){	    						    					
+					var schedule = schedules[k] ;	    					
+					if(schedule.from === from && schedule.to === to){
+                        return [program,schedule];
+					}
+				}
+			}
+		}    				
+  	}
     $scope.tuner_count = Schedule.get({id:"tuner_count"});
   	$scope.schedules = [];
   	$scope.programs =Program.query(function(){
@@ -13,30 +27,22 @@ dvrControllers.controller('ScheduleController', ['$scope', 'Program', 'Schedule'
 	    		schedule.to = Date.parse(schedule.to);
   			});
   		});
-    	var raw_schedules = Schedule.query(function(){    		
-    		$scope.programs.sort(function(a,b){return a.channel - b.channel});    		
+  		$scope.programs.sort(function(a,b){return a.channel - b.channel});    		
+    	var raw_schedules = Schedule.query(function(){    		    		
     		for(var i=0  ;i<raw_schedules.length ; i++){
-    			for(var j=0 ; j<$scope.programs.length && raw_schedules[i].channel >= $scope.programs[j].channel  ; j ++){    				    				
-	    			if(raw_schedules[i].channel === $scope.programs[j].channel){
-	    				var schedules = $scope.programs[j].schedules;
-	    				for(var k=0 ; k<schedules.length ; k++){	    						    					
-	    					var schedule = schedules[k] ;	    					
-	    					if(schedule.from === raw_schedules[i].from && schedule.to === raw_schedules[i].to){
-                                schedule.selected = true;
-                                $scope.schedules.push({
-	    							id: raw_schedules[i].id,
-	    							name: $scope.programs[j].name,
-	    							channel: $scope.programs[j].channel,
-	    							image: $scope.programs[j].image,
-	    							url: $scope.programs[j].url,
-	    							from: schedule.from,
-	    							to: schedule.to
-	    						});
-	    						break;
-	    					}
-	    				}
-	    			}
-	    		}    				
+    			var pair = find_program(raw_schedules[i].channel,raw_schedules[i].from,raw_schedules[i].to);
+				var program = pair[0];
+				var schedule = pair[1];
+				 $scope.schedules.push({
+					id: raw_schedules[i].id,
+					name: program.name,
+					channel: program.channel,
+					image: program.image,
+					url: program.url,
+					from: schedule.from,
+					to: schedule.to,
+					priority:raw_schedules[i].priority
+				});    			
     		}  
 	    });		
     });
@@ -45,33 +51,81 @@ dvrControllers.controller('ScheduleController', ['$scope', 'Program', 'Schedule'
     	Schedule.delete({id:schedule.id});
     	$scope.schedules.splice($scope.schedules.indexOf(schedule),1);    	
     }
-    $scope.record = function(program){
+    $scope.record = function(program){    	
     	var schedules = [];
     	angular.forEach(program.schedules,function(schedule){
     		if(schedule.selected && !$scope.is_scheduled(schedule,program.channel)){
     			schedules.push({from:schedule.from,to:schedule.to,channel:program.channel});
     		}    		
-    	});     	
+    	});         	
+    	function resolve_conflict_async(result,schedule){
+    		$scope.conflict_deferred = $q.defer();
+    		$scope.conflicts = result.conflicts.map(function(conflict){
+				var pair = find_program(conflict.channel,conflict.from,conflict.to);
+				var program = pair[0];
+				var schedule = pair[1];
+				return {
+					id:conflict.id,
+					name:program.name,
+					from:schedule.from,
+					to:schedule.to,
+					channel:program.channel	
+				}
+			});                    
+			$scope.conflicts.push({
+				id:result.id,
+				name:program.name,
+				from:schedule.from,
+				to:schedule.to,
+				channel:schedule.channel
+			});
+			console.log($scope.conflicts);
+    		return $scope.conflict_deferred.promise;
+    	}
+    	function process_result(i,results){
+    		if(i>=results.length){    			
+    			$route.reload();
+    			return;
+    		};
+    		var result = results[i];
+			if(result.exist){
+				alert(program.name + " is already in the schedule");
+				return process_result(i+1,results);
+			}				
+			$scope.schedules.push({
+				id: result.id,
+				name: program.name,
+				channel: program.channel,
+				image: program.image,
+				url: program.url,
+				from: schedules[i].from,
+				to: schedules[i].to
+			});
+
+			if(result.conflicts.length !== 0){
+				var promise = resolve_conflict_async(result,schedules[i]);
+				promise.then(function(){
+					return process_result(i+1,results);	
+				})
+            }else
+            	return process_result(i+1,results);
+    	}
     	Schedule.post(schedules,function(results){
-    		for(var i=0 ; i<results.length ; i++){
-    			var result = results[i];
-    			if(result.exist)
-    				alert(program.name + " is already in the schedule");
-    			else if(result.conflicts.length === 0){
-    				$scope.schedules.push({
-						id: result.id,
-						name: program.name,
-						channel: program.channel,
-						image: program.image,
-						url: program.url,
-						from: schedules[i].from,
-						to: schedules[i].to
-					});
-    			}else{
-                    $scope.has_conflicts = true;
-                }
-    		}    		
+    		process_result(0,results);
     	});
+    }
+    $scope.prioritize = function(){
+    	var  i = 1;
+    	var priorities = $scope.conflicts.map(function(conflict){
+    		return {
+    			id:conflict.id,
+    			priority:i++
+    		}
+    	})
+    	// console.log(priorities);
+    	Schedule.put({id:"prioritize"},priorities);    	
+    	$scope.conflicts = [];
+    	$scope.conflict_deferred.resolve();
     }
 
     $scope.has_selected_schedule = function(schedules,channel){

@@ -16,5 +16,5 @@ module.exports = function(app,scheduler) {
 	app.delete('/schedules/:id', inject_scheduler,schedule.delete);
 	app.get('/schedules/tuner_count', inject_scheduler,schedule.get_tuner_count);	
 	app.get('/schedules', inject_scheduler,schedule.show_all);
-	app.post('/schedules/prioritize',inject_scheduler, schedule.prioritize);
+	app.put('/schedules/prioritize',inject_scheduler, schedule.prioritize);
 };

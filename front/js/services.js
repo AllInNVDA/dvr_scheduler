@@ -14,5 +14,6 @@ dvrServices.factory('Schedule', ['$resource',
     return $resource('schedules' + '/:id', {id: '@id'}, {
       query: {method:'GET',  isArray:true},
       post: {method:'POST',  isArray:true},      
+      put: {method:'PUT'}
     });
 }]);

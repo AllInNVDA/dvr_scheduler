@@ -20,15 +20,25 @@
       </ul>    
     </div>
     <div class="col-md-offset-1 col-md-7">
-      <div><span>You have {{tuner_count.count}} tuner(s). You can set the number in ./config/env/all.js</span></div>
+      <div><span>You have {{tuner_count.count}} tuner(s). You can set the number in config/env/all.js</span></div>
       <br>
       <table class="table table-striped">
-        <tr ng-repeat='schedule in schedules | orderBy:"from"'>
-          <td><a href="{{schedule.url}}">{{schedule.name}}</a></td>
-          <td>{{schedule.from | date:'short'}} - {{schedule.to | date:'short'}}</td>          
-          <td><a ng-show="ended(schedule.to)" href="#/videos/{{schedule.id}}">Play</a></td>
-          <td><a ng-click="delete(schedule)">Delete</a></td>
-        </tr>
+        <thead>
+            <tr>
+                <th>Program</th>
+                <th>Time</th>
+                <th>Priority</th>
+            </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat='schedule in schedules | orderBy:["from", "priority"]'>
+            <td><a href="{{schedule.url}}">{{schedule.name}}</a></td>
+            <td>{{schedule.from | date:'short'}} - {{schedule.to | date:'short'}}</td>          
+            <td>{{schedule.priority}}</td>
+            <td><a ng-show="ended(schedule.to)" href="#/videos/{{schedule.id}}">Play</a></td>
+            <td><a ng-click="delete(schedule)">Delete</a></td>
+          </tr>
+        </tbody>
       </table>      
     </div> 
   <!-- <div class="row">
@@ -42,22 +52,25 @@
     </div>-->
   </div> 
 </div>
-<modal show="has_conflicts">
-<p>Prioritize the conflicts</p>
+<modal show="conflicts.length>0" ok="prioritize()">
+<p>Drap & Drop the rows to prioritize conflicts. </p>
 <div>
     <table style="width:auto;" class="table table-bordered">
         <thead>
             <tr>
-                <th>Index</th>
-                <th>Count</th>
+                <th>Priority</th>
+                <th>Name</th>
+                <th>Time</th>
             </tr>
         </thead>
-        <tbody ui:sortable ng:model="list">
-            <tr ng:repeat="item in [0,1,2,3,4,5]" class="item" style="cursor: move;">
-                <td>{{$index}}</td>
-                <td>{{$item}}</td>
+        <tbody ui-sortable  ng-model="conflicts">
+            <tr ng-repeat="conflict in conflicts" style="cursor: move;">
+                <!-- <td ng-if="$index===0" rowspan="6" class="up_arrow"></td> -->
+                <td>{{$index+1}}</td>
+                <td>{{conflict.name}}</td>
+                <td>{{conflict.from | date:'short'}} - {{conflict.to | date:'short'}}</td>
             </tr>
-        </tbody>{{list}}
+        </tbody>
         <hr>
 </div>
 </modal>

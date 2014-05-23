@@ -61,7 +61,7 @@ describe('Sample Tests', function() {
     it('should record 314 @ 2/11/2014 6:10pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T18:10:00.000Z"),function(results){
             results.should.be.eql([ 
-                tasks[0]
+                tasks[0].channel
             ]);
             done();
         },function(){});
@@ -70,7 +70,7 @@ describe('Sample Tests', function() {
     it('should record 215 @ 2/11/2014 8:30pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T20:30:00.000Z"),function(results){
             results.should.be.eql([ 
-               tasks[1]
+               tasks[1].channel
             ]);
             done();
         },function(){});
@@ -79,7 +79,7 @@ describe('Sample Tests', function() {
     it('should record 314 @ 2/11/2014 10:30pm', function(done) {              
         scheduler.query(Date.parse("2014-02-11T22:30:00.000Z"),function(results){
             results.should.be.eql([ 
-                tasks[2]
+                tasks[2].channel
             ]);
             done();
         },function(){});
@@ -94,10 +94,11 @@ describe('Sample Tests', function() {
         },function(){});
     });
 
-    it('should tell DVR conflicts  @ 2/11/2014 7:45pm', function(done) {              
+    it('should only return the one with highest priority @ 2/11/2014 7:45pm', function(done) {        
+        scheduler.prioritize(0,1);
         scheduler.query(Date.parse("2014-02-11T19:45:00.000Z"),function(results){
             results.should.be.eql([ 
-                tasks[0],tasks[1]
+                tasks[0].channel
             ]);
             done();
         },function(){});

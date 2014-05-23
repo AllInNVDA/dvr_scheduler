@@ -67,8 +67,9 @@ exports.show_all = function(req, res, next){
 	return res.send(200,req.scheduler.all());
 }
 
-exports.prioritize = function(req, res){	
+exports.prioritize = function(req, res){		
 	req.body.forEach(function(ranking){
+		console.log(ranking);
 		req.scheduler.prioritize(ranking.id,ranking.priority );
 	});
 	return res.send(200);

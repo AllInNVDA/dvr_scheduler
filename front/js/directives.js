@@ -7,7 +7,7 @@ dvrDirective.directive("modal", function() {
     restrict: "E",
     scope: {
       show: "=",
-      cancel: "&"
+      ok: "&"
     },
     replace: true, // Replace with the template below
     transclude: true, // we want to insert custom content inside the directive
@@ -18,20 +18,14 @@ dvrDirective.directive("modal", function() {
       if (attrs.height)
         scope.dialogStyle.height = attrs.height;
       scope.hide = function() {
-        scope.show = false;
+        // scope.show = false;
       };
-      
-      // scope.cancel = function() {
-      //   scope.show = false;
-      //   if(scope.cancel)
-      //     scope.cancel();
-      // };
     },
     template: '<div class="ng-modal" ng-show="show">                          \
                 <div class="ng-modal-overlay"></div>   \
                 <div class="ng-modal-dialog" ng-style="dialogStyle">          \
                   <div class="ng-modal-dialog-content" ng-transclude></div>   \
-                  <button class="btn btn-danger pull-right" ng-click="hide();cancel();">Cancel</button> \
+                  <button class="btn btn-success pull-right" ng-click="hide();ok();">OK</button> \
                 </div>                                                        \
               </div>'
   };

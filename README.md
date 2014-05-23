@@ -27,7 +27,8 @@ This project is...
 git clone https://github.com/GPRN/dvr_scheduler.git
 cd dvr_scheduler
 npm install -g grunt-cli
-npm install
+npm install -g bower
+npm install && bower install
 ```
 
 ## Run the Test
@@ -53,3 +54,4 @@ grunt cov --file=sam
 ```
 grunt serve
 ```
+Users will be asked to prioritize conlict programs. To test this feature, search "news" for conflict programs.

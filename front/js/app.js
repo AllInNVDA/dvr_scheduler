@@ -7,7 +7,8 @@ var dvrClient = angular.module('dvrClient', [
   'ui.bootstrap',
   'dvrControllers',
   'dvrDirective',
-  'dvrServices'
+  'dvrServices',
+  'ui'
 ]);
 
 dvrClient.config(['$routeProvider',
