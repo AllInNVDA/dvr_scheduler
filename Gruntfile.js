@@ -13,13 +13,16 @@ module.exports = function(grunt) {
     open:{
       cov:{
         path: '.tmp/coverage/lcov-report/index.html'        
-      }
+      },
+      client:{
+        path: 'http://localhost:3001'        
+      },
     },    
-    // execute: {      
-    //   dev: {          
-    //       src: ['server.js']
-    //   },
-    // }, 
+    execute: {      
+      dev: {          
+          src: ['server.js']
+      },
+    }, 
     mochaTest: {
       test: {
         options: {
@@ -64,10 +67,11 @@ module.exports = function(grunt) {
       ]);
   });
 
-  // grunt.registerTask('serve', function() {
-  //   return grunt.task.run([        
-  //       'env:dev',                
-  //       'execute:dev'     
-  //     ]);
-  // });
+  grunt.registerTask('serve', function() {
+    return grunt.task.run([        
+        'env:dev',                
+        'execute:dev',
+        'open:client',     
+      ]);
+  });
 };
