@@ -5,6 +5,7 @@
 'use strict';
 
 var fs = new require('fs'),
+	config = require('../config/config'),
 	validator = require("./validator");
 
 var OPERATIONS = {
@@ -32,7 +33,24 @@ module.exports = function(save_path,done){
 	*/
 	intervals.clearIntervalStack();
 	
-	var schedules = [] ;	
+	var schedules = [] ;
+
+	var number_of_tuners = config.num_tuners;	
+
+	/**
+	* DVR should tell scheduler how many tuners are available
+	*
+	* @public
+	* @method set_tuners
+	* @param {int} n number of tuners are in use
+	*/
+	function set_tuner_count(n){
+		number_of_tuners = n;
+	}
+
+	function get_tuner_count(){
+		return number_of_tuners;
+	}
 
 	/**
 	* User calls this function to add a schedule
@@ -69,10 +87,10 @@ module.exports = function(save_path,done){
 					conflict_schedule.to === schedule.to){
 					var ret =	{
 						id:conflicts[i].id, 
-						conflicts:_filter(conflicts,null,schedule.channel), 
+						conflicts:_process_conflicts(conflicts,null,schedule.channel), 
 						exist:!conflict_schedule.removed
 					}
-					conflict_schedule.removed = false;
+					conflict_schedule.removed = false;					
 					return next(ret);
 				}
 					
@@ -93,7 +111,7 @@ module.exports = function(save_path,done){
 					* For simplicity, currently I just remove the same-channel recording task from the conflicts and 
 					* will deduplicate channel ids when DVR requests the schedule
 					*/
-					conflicts:_filter(conflicts,null,schedule.channel)
+					conflicts:_process_conflicts(conflicts,null,schedule.channel)
 				});
 			},error);
 		}});
@@ -128,7 +146,7 @@ module.exports = function(save_path,done){
 	function query(time,next,error){
 		if(!validator.is_number(time)) return error("wrong arguments");
 		intervals.queryPoint(time,function(intervals){
-			next(_filter(intervals,time));
+			next(_process_conflicts(intervals,time));
 		});
 	}
 
@@ -172,26 +190,35 @@ module.exports = function(save_path,done){
 		},error);
 		
 	}
+
+	function prioritize(id,priority){
+		schedules[id].priority = priority;		
+	}
 	
 	/**
-	* Filter out schedules
-	* @desc Three filter rules
-	*	1) marked as removed
-	*	2) end at the specified time
-	*	3) channel = the third parameter
+	* Process conflicts
+	* @desc it does the following things
+	*	1) filter out conflicts marked as removed
+	*	2) filter out conflicts end at the specified time
+	*	3) filter out conflicts with the same channel number(the third parameter)	 
 	* @private	
-	* @method _filter
+	* @method _process_conflicts
 	* @param {[object]} intervals 	a list of intervals need to be filtered
 	* @param {int} time optional			any schedules that end on this time should be filtered
 	* @return {[object]} a list of filtered schedules
 	*/
-	function _filter(intervals,time, channel){
+	function _process_conflicts(intervals,time, channel){
 		var filtered_schedules = [];
 		intervals.forEach(function(interval){
 			var schedule = schedules[interval.id];
 			if(schedule && !schedule.removed && schedule.to!=time && schedule.channel!=channel)
 				filtered_schedules.push(schedule);
 		});
+		/**
+		* There will be no conflicts if conflicts are less than the tuners! 
+		*/
+		if(filtered_schedules.length<number_of_tuners)
+			return [];
 		return filtered_schedules;
 	}
 
@@ -255,6 +282,9 @@ module.exports = function(save_path,done){
 		add:add,
 		add_array:add_array,
 		query:query,
-		remove:remove
+		remove:remove,
+		set_tuner_count:set_tuner_count,
+		get_tuner_count:get_tuner_count,
+		prioritize:prioritize
 	};
 }

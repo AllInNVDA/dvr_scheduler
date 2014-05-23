@@ -14,9 +14,7 @@ module.exports = function(app,scheduler) {
 	var schedule = require('../server/schedule');
 	app.post('/schedules',inject_scheduler, schedule.create);
 	app.delete('/schedules/:id', inject_scheduler,schedule.delete);
-	// app.get('/schedules/:id', schedule.show);
+	app.get('/schedules/tuner_count', inject_scheduler,schedule.get_tuner_count);	
 	app.get('/schedules', inject_scheduler,schedule.show_all);
-	// app.put('/schedules/:id', schedule.update);
-
-	// app.get('/programs/:q', program.search);
+	app.post('/schedules/prioritize',inject_scheduler, schedule.prioritize);
 };

@@ -55,7 +55,7 @@ exports.create = function(req, res, next){
 * @param {function} next the callback function
 */
 exports.delete = function(req, res, next){	
-	console.log(req.params.id)
+	// console.log(req.params.id)
 	req.scheduler.remove(+req.params.id,function(result){
 		return res.send(200);
 	},function(err){
@@ -65,4 +65,15 @@ exports.delete = function(req, res, next){
 
 exports.show_all = function(req, res, next){	
 	return res.send(200,req.scheduler.all());
+}
+
+exports.prioritize = function(req, res){	
+	req.body.forEach(function(ranking){
+		req.scheduler.prioritize(ranking.id,ranking.priority );
+	});
+	return res.send(200);
+}
+
+exports.get_tuner_count = function(req, res){
+	return res.send(200, {count:req.scheduler.get_tuner_count()});	
 }

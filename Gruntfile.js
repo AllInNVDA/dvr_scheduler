@@ -69,9 +69,9 @@ module.exports = function(grunt) {
 
   grunt.registerTask('serve', function() {
     return grunt.task.run([        
-        'env:dev',                
-        'execute:dev',
-        'open:client',     
+        'env:dev',   
+        'open:client',               
+        'execute:dev'
       ]);
   });
 };

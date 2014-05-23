@@ -11,15 +11,17 @@
     
       <ul class="no-list row">
           <li ng-repeat="schedule in selected_program.schedules">
-            <input ng-disabled="schedule.scheduled" type="checkbox" ng-model="schedule.selected">{{schedule[0] | date:'short'}} - {{schedule[1] | date:'short'}}          
+            <input ng-disabled="is_scheduled(schedule,selected_program.channel)" type="checkbox" ng-model="schedule.selected">{{schedule.from | date:'short'}} - {{schedule.to | date:'short'}}          
           </li>
           <li></li>
           <li>
-            <button ng-disabled="!has_selected_schedule(selected_program.schedules)" class="btn btn-sm btn-primary" ng-click="record(selected_program)">Record</button>      
+            <button ng-disabled="!has_selected_schedule(selected_program.schedules,selected_program.channel)" class="btn btn-sm btn-primary" ng-click="record(selected_program)">Record</button>      
           </li>
       </ul>    
     </div>
     <div class="col-md-offset-1 col-md-7">
+      <div><span>You have {{tuner_count.count}} tuner(s). You can set the number in ./config/env/all.js</span></div>
+      <br>
       <table class="table table-striped">
         <tr ng-repeat='schedule in schedules | orderBy:"from"'>
           <td><a href="{{schedule.url}}">{{schedule.name}}</a></td>
@@ -40,3 +42,22 @@
     </div>-->
   </div> 
 </div>
+<modal show="has_conflicts">
+<p>Prioritize the conflicts</p>
+<div>
+    <table style="width:auto;" class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody ui:sortable ng:model="list">
+            <tr ng:repeat="item in [0,1,2,3,4,5]" class="item" style="cursor: move;">
+                <td>{{$index}}</td>
+                <td>{{$item}}</td>
+            </tr>
+        </tbody>{{list}}
+        <hr>
+</div>
+</modal>
