@@ -21,16 +21,15 @@ function errorize(err) {
 
 
 /**
-* Creates a scheduler restfully.
+* Creates a schedule.
 *
 * @public
 * @async
 * @method create
 * @param {object} req the request object
 * @param {object} res the response object
-* @param {function} next the callback function
 */
-exports.create = function(req, res, next){
+exports.create = function(req, res){
 	var func ;
 	if(Array.isArray(req.body))
 		func = req.scheduler.add_array;
@@ -45,16 +44,15 @@ exports.create = function(req, res, next){
 }
 
 /**
-* Deletes a scheduler restfully.
+* Deletes a schedule by id.
 *
 * @public
 * @async
 * @method delete
 * @param {object} req the request object
 * @param {object} res the response object
-* @param {function} next the callback function
 */
-exports.delete = function(req, res, next){	
+exports.delete = function(req, res){	
 	// console.log(req.params.id)
 	req.scheduler.remove(+req.params.id,function(result){
 		return res.send(200);
@@ -63,10 +61,28 @@ exports.delete = function(req, res, next){
 	});
 }
 
-exports.show_all = function(req, res, next){	
+/**
+* Returns all schedules
+*
+* @public
+* @async
+* @method show_all
+* @param {object} req the request object
+* @param {object} res the response object
+*/
+exports.show_all = function(req, res){	
 	return res.send(200,req.scheduler.all());
 }
 
+/**
+* Prioritize a list of schedules
+*
+* @public
+* @async
+* @method prioritize
+* @param {object} req the request object
+* @param {object} res the response object
+*/
 exports.prioritize = function(req, res){		
 	req.body.forEach(function(ranking){
 		console.log(ranking);
@@ -75,6 +91,15 @@ exports.prioritize = function(req, res){
 	return res.send(200);
 }
 
+/**
+* Get tuner count
+*
+* @public
+* @async
+* @method get_tuner_count
+* @param {object} req the request object
+* @param {object} res the response object
+*/
 exports.get_tuner_count = function(req, res){
 	return res.send(200, {count:req.scheduler.get_tuner_count()});	
 }

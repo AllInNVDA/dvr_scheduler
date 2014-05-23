@@ -38,16 +38,23 @@ module.exports = function(save_path,done){
 	var number_of_tuners = config.num_tuners;	
 
 	/**
-	* DVR should tell scheduler how many tuners are available
+	* Set the number of available tuners
 	*
 	* @public
-	* @method set_tuners
+	* @method set_tuner_count
 	* @param {int} n number of tuners are in use
 	*/
 	function set_tuner_count(n){
 		number_of_tuners = n;
 	}
 
+	/**
+	* Get the number of available tuners
+	*
+	* @public
+	* @method get_tuner_count
+	* @return {int} number of tuners
+	*/
 	function get_tuner_count(){
 		return number_of_tuners;
 	}
@@ -117,6 +124,17 @@ module.exports = function(save_path,done){
 		}});
 	}
 
+	/**
+	* User calls this function to add a list of schedules
+	*
+	* @public
+	* @async
+	* @method add_array
+	* @param {[object]} schedules a list of schedules	
+	* @param {function} next the callback function
+	* @param {function} error the error callback function
+	* @return {[object]} a list of objects with ids and conflits of the schedules
+	*/
 	function add_array(schedules,next,error){
 		if(!Array.isArray(schedules)) return error("the first parameter is not an array.");
 		var results = [];
@@ -200,10 +218,19 @@ module.exports = function(save_path,done){
 		
 		_save_operation(OPERATIONS.REMOVE,id,function(){
 			return next && next(true);	
-		},error);
-		
+		},error);		
 	}
 
+	/**
+	* User calls this function to set a priority value for a schedule
+	*
+	* @public
+	* @method prioritize
+	* @param {int} id the id of the schedule to be prioritized
+	* @param {int} priority lower value means higher priority
+	* @param {function} next the callback function
+	* @param {function} error the error callback function	
+	*/
 	function prioritize(id,priority){
 		schedules[id].priority = priority;		
 	}

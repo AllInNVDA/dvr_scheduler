@@ -4,7 +4,17 @@ var dvrControllers = angular.module('dvrControllers', []);
 
 dvrControllers.controller('ScheduleController', ['$route', '$q', '$scope', 'Program', 'Schedule',
   function($route,$q, $scope, Program,Schedule) {
-  	function find_program(channel,from,to){
+  	/**
+    * Find a program by a channel id, start time and end time
+    *
+    * @private    
+    * @method find_program
+    * @param {int} channel channel id
+    * @param {int} from start time
+    * @param {int} to end time
+    * @return {[object,object]} [program,schedule]
+    */
+    function find_program(channel,from,to){
   		for(var j=0 ; j<$scope.programs.length; j ++){    				    				
   			var program = $scope.programs[j];
 			if(program.channel === channel){
@@ -18,11 +28,23 @@ dvrControllers.controller('ScheduleController', ['$route', '$q', '$scope', 'Prog
 			}
 		}    				
   	}
+
     $scope.tuner_count = Schedule.get({id:"tuner_count"});
+
+    /**
+    * A list of schedules to be recorded
+    */
   	$scope.schedules = [];
-  	$scope.programs =Program.query(function(){
+
+    /**
+    * A list of TV programs to be aired
+    */
+  	$scope.programs =Program.query(function(){        
   		$scope.programs.forEach(function(program){
   			program.schedules.forEach(function(schedule){
+                /**
+                * For readability, all program data use strings to represent Date values.                
+                */
   				schedule.from = Date.parse(schedule.from);
 	    		schedule.to = Date.parse(schedule.to);
   			});
