@@ -1,0 +1,45 @@
+[
+	{
+		"name" : "NBC Nightly News With Brian Williams",
+		 "schedules":[
+		 	["2014-05-22 18:30:00","2014-05-22 19:00:00"],
+		 	["2014-05-23 18:30:00","2014-05-23 19:00:00"],
+		 	["2014-05-26 18:30:00","2014-05-26 19:00:00"],
+		 	["2014-05-27 18:30:00","2014-05-27 19:00:00"],
+		 	["2014-05-28 18:30:00","2014-05-28 19:00:00"]
+		 ],
+		 "channel": 5,
+		 "image":"http://static.tvgcdn.net/rovi/showcards/tvshow/337660/thumbs/16923668_150x200.jpg",
+		 "url": "http://www.tvguide.com/tvshows/nbc-nightly-news-with-brian-williams/337660"
+	},
+	{
+		"name" : "Laureus Sports Awards",
+		 "schedules":[
+		 	["2014-05-24 14:00:00","2014-05-24 15:00:00"]		 	
+		 ],
+		 "channel": 5,
+		 "image":"http://a.espncdn.com/photo/2010/0922/pg2_g_laurenus_400.jpg",
+		 "url": "http://www.laureus.com/awards2014/"
+	},
+	{
+		"name" : "Cosmos: A Spacetime Odyssey",
+		 "schedules":[
+		 	["2014-06-01 20:00:00","2014-06-01 21:00:00"]		 	
+		 ],
+		 "channel": 19,
+		 "image":"http://static.tvgcdn.net/mediabin/showcards/tvshows/thumbs/549901-cosmos-spacetime-odyssey_150x200.png",
+		 "url": "http://www.tvguide.com/tvshows/cosmos-a-spacetime-odyssey/549901"
+	},	
+	{
+		"name" : "24: Live Another Day",
+		 "schedules":[
+		 	["2014-05-23 19:00:00","2014-05-23 20:00:00"],
+		 	["2014-05-26 20:00:00","2014-05-26 21:00:00"],
+		 	["2014-05-30 19:00:00","2014-05-30 20:00:00"],
+		 	["2014-06-02 20:00:00","2014-06-02 21:00:00"]
+		 ],
+		 "channel": 19,
+		 "image":"http://static.tvgcdn.net/mediabin/showcards/tvshows/thumbs/571392-24-live-another-day_150x200.png",
+		 "url": "http://www.tvguide.com/tvshows/24-live-another-day/571392"
+	}
+]

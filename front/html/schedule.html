@@ -1,0 +1,42 @@
+<script type="text/ng-template" id="search_result.html">
+  <a>      
+      <img ng-src="{{match.model.image}}" width="16">
+      <span bind-html-unsafe="match.model.name | typeaheadHighlight:query"></span>
+  </a>
+</script>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-4">
+      <input type="text" ng-model="selected_program" placeholder="type a program name" typeahead="program as program.name for program in programs | filter:{name:$viewValue}" typeahead-template-url="search_result.html" class="row form-control">
+    
+      <ul class="no-list row">
+          <li ng-repeat="schedule in selected_program.schedules">
+            <input ng-disabled="schedule.scheduled" type="checkbox" ng-model="schedule.selected">{{schedule[0] | date:'short'}} - {{schedule[1] | date:'short'}}          
+          </li>
+          <li></li>
+          <li>
+            <button ng-disabled="!has_selected_schedule(selected_program.schedules)" class="btn btn-sm btn-primary" ng-click="record(selected_program)">Record</button>      
+          </li>
+      </ul>    
+    </div>
+    <div class="col-md-offset-1 col-md-7">
+      <table class="table table-striped">
+        <tr ng-repeat='schedule in schedules | orderBy:"from"'>
+          <td><a href="{{schedule.url}}">{{schedule.name}}</a></td>
+          <td>{{schedule.from | date:'short'}} - {{schedule.to | date:'short'}}</td>          
+          <td><a ng-show="ended(schedule.to)" href="#/videos/{{schedule.id}}">Play</a></td>
+          <td><a ng-click="delete(schedule)">Delete</a></td>
+        </tr>
+      </table>      
+    </div> 
+  <!-- <div class="row">
+    <div class="col-md-10">
+      <ul class="no-list">
+        <li ng-repeat="schedule in schedules | filter:query" class="thumbnail">
+          <a href="#/phones/{{phone.id}}" class="thumb"><img ng-src="{{phone.imageUrl}}"></a>
+          <a href="{{schedule.program.url}}">{{schedule.program.name}}</a>          
+        </li>
+      </ul>
+    </div>-->
+  </div> 
+</div>

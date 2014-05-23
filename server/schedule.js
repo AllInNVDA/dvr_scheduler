@@ -30,8 +30,14 @@ function errorize(err) {
 * @param {object} res the response object
 * @param {function} next the callback function
 */
-exports.create = function(req, res, next){	
-	req.scheduler.add(req.body,function(result){
+exports.create = function(req, res, next){
+	var func ;
+	if(Array.isArray(req.body))
+		func = req.scheduler.add_array;
+	else
+		func = req.scheduler.add;
+	func(req.body,function(result){
+		console.log(result);
 		return res.send(200,result);
 	},function(err){
 		return res.send(400,errorize(err));
@@ -49,9 +55,14 @@ exports.create = function(req, res, next){
 * @param {function} next the callback function
 */
 exports.delete = function(req, res, next){	
+	console.log(req.params.id)
 	req.scheduler.remove(+req.params.id,function(result){
 		return res.send(200);
 	},function(err){
 		return res.send(400,errorize(err));
 	});
+}
+
+exports.show_all = function(req, res, next){	
+	return res.send(200,req.scheduler.all());
 }

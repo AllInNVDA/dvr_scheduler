@@ -49,18 +49,36 @@ module.exports = function(save_path,done){
 	* @return {object} an id of the added schedule and a lists of conflict schedules
 	*/
 	function add(schedule,next,error){
-		if(!validator.not_null(schedule)) return error("wrong arguments");
-		if(!validator.not_null(schedule.from,schedule.to, schedule.channel)) return error("wrong arguments");
-		if(!validator.is_number(schedule.from,schedule.to)) return error("wrong arguments");
-		if(schedule.from>=schedule.to) return error("wrong arguments");
+		if(!validator.not_null(schedule)) return error("schedule is null");
+		if(!validator.not_null(schedule.from,schedule.to, schedule.channel)) return error("some schedule properties are null");
+		if(!validator.is_number(schedule.from,schedule.to)) return error("from and to are not numbers");
+		if(schedule.from>=schedule.to) return error("from >= to");
 
 		/**
 		* There will be no conflict if one schedule starts at a time another schedule ends.
 		* So endpoints = false should be used here.
 		*/		
 		intervals.queryInterval(schedule.from, schedule.to,{endpoints:false,resultFn:function(conflicts){
+			for(var i=0 ; i<conflicts.length ; i++){
+				var conflict_schedule = schedules[conflicts[i].id];
+				/**
+				* Do not add the same schedule again				
+				*/		
+				if(	conflict_schedule.channel === schedule.channel &&
+					conflict_schedule.from === schedule.from &&
+					conflict_schedule.to === schedule.to){
+					var ret =	{
+						id:conflicts[i].id, 
+						conflicts:_filter(conflicts,null,schedule.channel), 
+						exist:!conflict_schedule.removed
+					}
+					conflict_schedule.removed = false;
+					return next(ret);
+				}
+					
+			}
 			var id = intervals.pushInterval(schedule.from, schedule.to);
-			schedule.id = id ;		
+			schedule.id = id ;
 			schedules[id] = schedule;		
 
 			/**
@@ -70,10 +88,29 @@ module.exports = function(save_path,done){
 			_save_operation(OPERATIONS.ADD,schedule,function(){
 				return next && next({
 					id:id,
-					conflicts:_filter(conflicts)
+					/**
+					* @todo: If the user sends two conflit tasks for the same channel, these two tasks can be merged.
+					* For simplicity, currently I just remove the same-channel recording task from the conflicts and 
+					* will deduplicate channel ids when DVR requests the schedule
+					*/
+					conflicts:_filter(conflicts,null,schedule.channel)
 				});
 			},error);
 		}});
+	}
+
+	function add_array(schedules,next,error){
+		console.log(schedules)
+		if(!Array.isArray(schedules)) return error("the first parameter is not an array.");
+		var results = [];
+		function add_one(idx){
+			if(idx >= schedules.length) return next(results);
+			add(schedules[idx],function(result){
+				results.push(result);
+				add_one(idx+1);
+			},error);
+		}
+		add_one(0);
 	}
 
 	/**
@@ -86,6 +123,7 @@ module.exports = function(save_path,done){
 	* @param {function} next the callback function
 	* @param {function} error the error callback function
 	* @return {[int]} a list of prioritized channels
+	* @todo deduplicate channel ids
 	*/
 	function query(time,next,error){
 		if(!validator.is_number(time)) return error("wrong arguments");
@@ -136,19 +174,22 @@ module.exports = function(save_path,done){
 	}
 	
 	/**
-	* Filter out schedules that are marked as removed and end at the specified time
-	*
+	* Filter out schedules
+	* @desc Three filter rules
+	*	1) marked as removed
+	*	2) end at the specified time
+	*	3) channel = the third parameter
 	* @private	
 	* @method _filter
 	* @param {[object]} intervals 	a list of intervals need to be filtered
 	* @param {int} time optional			any schedules that end on this time should be filtered
 	* @return {[object]} a list of filtered schedules
 	*/
-	function _filter(intervals,time){
+	function _filter(intervals,time, channel){
 		var filtered_schedules = [];
 		intervals.forEach(function(interval){
 			var schedule = schedules[interval.id];
-			if(schedule && !schedule.removed && schedule.to!=time)
+			if(schedule && !schedule.removed && schedule.to!=time && schedule.channel!=channel)
 				filtered_schedules.push(schedule);
 		});
 		return filtered_schedules;
@@ -212,6 +253,7 @@ module.exports = function(save_path,done){
 	return {
 		all:all,
 		add:add,
+		add_array:add_array,
 		query:query,
 		remove:remove
 	};
