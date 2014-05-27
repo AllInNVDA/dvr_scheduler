@@ -6,33 +6,103 @@ f.event={add:function(a,c,d,e,g){var h,i,j,k,l,m,n,o,p,q,r,s;if(!(a.nodeType===3
 
   tableOfContents = [
     {
-      "type": "file",
+      "type": "folder",
       "data": {
-        "language": {
-          "nameMatchers": [".js"],
-          "pygmentsLexer": "javascript",
-          "multiLineComment": ["/*", "*", "*/"],
-          "singleLineComment": ["//"],
-          "ignorePrefix": "}",
-          "foldPrefix": "^",
-          "name": "JavaScript"
-        },
-        "sourcePath": "/home/shuang/Projects/dvr_scheduler/server/scheduler.js",
-        "projectPath": "server/scheduler.js",
-        "targetPath": "scheduler",
-        "pageTitle": "scheduler",
-        "title": "scheduler"
+        "path": "front",
+        "title": "front"
       },
       "depth": 1,
-      "outline": [
+      "children": [
         {
-          "type": "heading",
+          "type": "folder",
           "data": {
-            "level": 2,
-            "title": "DVR Scheduler",
-            "slug": "dvr-scheduler"
+            "path": "front/js",
+            "title": "js"
           },
-          "depth": 2
+          "depth": 2,
+          "children": [
+            {
+              "type": "file",
+              "data": {
+                "language": {
+                  "nameMatchers": [".js"],
+                  "pygmentsLexer": "javascript",
+                  "multiLineComment": ["/*", "*", "*/"],
+                  "singleLineComment": ["//"],
+                  "ignorePrefix": "}",
+                  "foldPrefix": "^",
+                  "name": "JavaScript"
+                },
+                "sourcePath": "D:\\Projects\\dvr_scheduler\\front\\js\\app.js",
+                "projectPath": "front\\js\\app.js",
+                "targetPath": "front\\js\\app",
+                "pageTitle": "front\\js\\app",
+                "title": "app"
+              },
+              "depth": 3,
+              "outline": []
+            }, {
+              "type": "file",
+              "data": {
+                "language": {
+                  "nameMatchers": [".js"],
+                  "pygmentsLexer": "javascript",
+                  "multiLineComment": ["/*", "*", "*/"],
+                  "singleLineComment": ["//"],
+                  "ignorePrefix": "}",
+                  "foldPrefix": "^",
+                  "name": "JavaScript"
+                },
+                "sourcePath": "D:\\Projects\\dvr_scheduler\\front\\js\\controllers.js",
+                "projectPath": "front\\js\\controllers.js",
+                "targetPath": "front\\js\\controllers",
+                "pageTitle": "front\\js\\controllers",
+                "title": "controllers"
+              },
+              "depth": 3,
+              "outline": []
+            }, {
+              "type": "file",
+              "data": {
+                "language": {
+                  "nameMatchers": [".js"],
+                  "pygmentsLexer": "javascript",
+                  "multiLineComment": ["/*", "*", "*/"],
+                  "singleLineComment": ["//"],
+                  "ignorePrefix": "}",
+                  "foldPrefix": "^",
+                  "name": "JavaScript"
+                },
+                "sourcePath": "D:\\Projects\\dvr_scheduler\\front\\js\\directives.js",
+                "projectPath": "front\\js\\directives.js",
+                "targetPath": "front\\js\\directives",
+                "pageTitle": "front\\js\\directives",
+                "title": "directives"
+              },
+              "depth": 3,
+              "outline": []
+            }, {
+              "type": "file",
+              "data": {
+                "language": {
+                  "nameMatchers": [".js"],
+                  "pygmentsLexer": "javascript",
+                  "multiLineComment": ["/*", "*", "*/"],
+                  "singleLineComment": ["//"],
+                  "ignorePrefix": "}",
+                  "foldPrefix": "^",
+                  "name": "JavaScript"
+                },
+                "sourcePath": "D:\\Projects\\dvr_scheduler\\front\\js\\services.js",
+                "projectPath": "front\\js\\services.js",
+                "targetPath": "front\\js\\services",
+                "pageTitle": "front\\js\\services",
+                "title": "services"
+              },
+              "depth": 3,
+              "outline": []
+            }
+          ]
         }
       ]
     }

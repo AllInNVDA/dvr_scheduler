@@ -16,8 +16,6 @@ This project is...
 
 [istanbul](http://gotwarlost.github.io/istanbul/): for coverage report
 
-[protractor](https://github.com/angular/protractor): for end to end testing (not started)
-
 [supertest](https://github.com/visionmedia/supertest): for RESTful APIs testing
 
 [groc](https://github.com/nevir/groc): for documentation

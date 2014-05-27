@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="en"><head><title>front\js\controllers</title></head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"><meta name="groc-relative-root" content="../../"><meta name="groc-document-path" content="front\js\controllers"><meta name="groc-project-path" content="front\js\controllers.js"><link rel="stylesheet" type="text/css" media="all" href="../../assets/style.css"><script type="text/javascript" src="../../assets/behavior.js"></script><body><div id="meta"><div class="file-path">front\js\controllers.js</div></div><div id="document"><div class="segment"><div class="code"><div class="wrapper"><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">dvrControllers</span> <span class="o">=</span> <span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;dvrControllers&#39;</span><span class="p">,</span> <span class="p">[]);</span>
+
+<span class="nx">dvrControllers</span><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s1">&#39;ScheduleController&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;$timeout&#39;</span><span class="p">,</span><span class="s1">&#39;$route&#39;</span><span class="p">,</span> <span class="s1">&#39;$q&#39;</span><span class="p">,</span> <span class="s1">&#39;$scope&#39;</span><span class="p">,</span> <span class="s1">&#39;Program&#39;</span><span class="p">,</span> <span class="s1">&#39;Schedule&#39;</span><span class="p">,</span>
+  <span class="kd">function</span><span class="p">(</span><span class="nx">$timeout</span><span class="p">,</span> <span class="nx">$route</span><span class="p">,</span><span class="nx">$q</span><span class="p">,</span> <span class="nx">$scope</span><span class="p">,</span> <span class="nx">Program</span><span class="p">,</span><span class="nx">Schedule</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">conflict_deferred</span><span class="p">;</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private method find_program</span></p>
+
+<p>Find a program by a channel id, start time and end time</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>channel must be an int.</strong><br/>(channel id)</p></li>
+<li><p><strong>from must be an int.</strong><br/>(start time)</p></li>
+<li><p><strong>to must be an int.</strong><br/>(end time)</p></li>
+</ul>
+
+<p><strong>Returns a [object,object]</strong><br/>([program,schedule])</p></div></div><div class="code"><div class="wrapper">    <span class="kd">function</span> <span class="nx">find_program</span><span class="p">(</span><span class="nx">channel</span><span class="p">,</span><span class="nx">from</span><span class="p">,</span><span class="nx">to</span><span class="p">){</span>
+      <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">j</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span> <span class="nx">j</span><span class="o">&lt;</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">programs</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">j</span> <span class="o">++</span><span class="p">){</span>                        
+        <span class="kd">var</span> <span class="nx">program</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">programs</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">program</span><span class="p">.</span><span class="nx">channel</span> <span class="o">===</span> <span class="nx">channel</span><span class="p">){</span>
+        <span class="kd">var</span> <span class="nx">schedules</span> <span class="o">=</span> <span class="nx">program</span><span class="p">.</span><span class="nx">schedules</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">k</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span> <span class="nx">k</span><span class="o">&lt;</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">length</span> <span class="p">;</span> <span class="nx">k</span><span class="o">++</span><span class="p">){</span>                                
+          <span class="kd">var</span> <span class="nx">schedule</span> <span class="o">=</span> <span class="nx">schedules</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span> <span class="p">;</span>               
+          <span class="k">if</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span> <span class="o">===</span> <span class="nx">from</span> <span class="o">&amp;&amp;</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span> <span class="o">===</span> <span class="nx">to</span><span class="p">){</span>
+                        <span class="k">return</span> <span class="p">[</span><span class="nx">program</span><span class="p">,</span><span class="nx">schedule</span><span class="p">];</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>           
+    <span class="p">}</span>
+
+    <span class="nx">$scope</span><span class="p">.</span><span class="nx">tuner_count</span> <span class="o">=</span> <span class="nx">Schedule</span><span class="p">.</span><span class="nx">get</span><span class="p">({</span><span class="nx">id</span><span class="o">:</span><span class="s2">&quot;tuner_count&quot;</span><span class="p">});</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>A list of schedules to be recorded</p></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span> <span class="o">=</span> <span class="p">[];</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>A list of TV programs to be aired</p></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">programs</span> <span class="o">=</span><span class="nx">Program</span><span class="p">.</span><span class="nx">query</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>        
+      <span class="nx">$scope</span><span class="p">.</span><span class="nx">programs</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">program</span><span class="p">){</span>
+        <span class="nx">program</span><span class="p">.</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">schedule</span><span class="p">){</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>For readability, dates in the json file are represented by strings.                </p></div></div><div class="code"><div class="wrapper">          <span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">);</span>
+          <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">);</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+      <span class="kd">var</span> <span class="nx">raw_schedules</span> <span class="o">=</span> <span class="nx">Schedule</span><span class="p">.</span><span class="nx">query</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>                
+        <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span>  <span class="p">;</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">raw_schedules</span><span class="p">.</span><span class="nx">length</span> <span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">){</span>
+          <span class="kd">var</span> <span class="nx">pair</span> <span class="o">=</span> <span class="nx">find_program</span><span class="p">(</span><span class="nx">raw_schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">channel</span><span class="p">,</span><span class="nx">raw_schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">from</span><span class="p">,</span><span class="nx">raw_schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">to</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">program</span> <span class="o">=</span> <span class="nx">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+        <span class="kd">var</span> <span class="nx">schedule</span> <span class="o">=</span> <span class="nx">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+         <span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+          <span class="nx">id</span><span class="o">:</span> <span class="nx">raw_schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">,</span>
+          <span class="nx">name</span><span class="o">:</span> <span class="nx">program</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+          <span class="nx">channel</span><span class="o">:</span> <span class="nx">program</span><span class="p">.</span><span class="nx">channel</span><span class="p">,</span>
+          <span class="nx">image</span><span class="o">:</span> <span class="nx">program</span><span class="p">.</span><span class="nx">image</span><span class="p">,</span>
+          <span class="nx">url</span><span class="o">:</span> <span class="nx">program</span><span class="p">.</span><span class="nx">url</span><span class="p">,</span>
+          <span class="nx">from</span><span class="o">:</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span>
+          <span class="nx">to</span><span class="o">:</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">,</span>
+          <span class="nx">priority</span><span class="o">:</span><span class="nx">raw_schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">priority</span>
+        <span class="p">});</span>         
+        <span class="p">}</span>  
+      <span class="p">});</span>   
+    <span class="p">});</span>
+    </div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method delete</span></p>
+
+<p>Delete a schedule</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>schedule must be an object.</strong><br/>(schedule object)</li>
+</ul></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="k">delete</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">schedule</span><span class="p">){</span>     
+      <span class="nx">Schedule</span><span class="p">.</span><span class="k">delete</span><span class="p">({</span><span class="nx">id</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">id</span><span class="p">});</span>
+      <span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">schedule</span><span class="p">),</span><span class="mi">1</span><span class="p">);</span>      
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method record</span></p>
+
+<p>Schedule recordings for a program</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>program must be an object.</strong><br/>(program object)</li>
+</ul></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">record</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">program</span><span class="p">){</span>      
+      <span class="kd">var</span> <span class="nx">schedules</span> <span class="o">=</span> <span class="p">[];</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Get seleted proram schedules</p></div></div><div class="code"><div class="wrapper">  
+      <span class="nx">angular</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">program</span><span class="p">.</span><span class="nx">schedules</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">schedule</span><span class="p">){</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">selected</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">is_scheduled</span><span class="p">(</span><span class="nx">schedule</span><span class="p">,</span><span class="nx">program</span><span class="p">.</span><span class="nx">channel</span><span class="p">)){</span>
+          <span class="nx">schedules</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="nx">from</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span><span class="nx">to</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">,</span><span class="nx">channel</span><span class="o">:</span><span class="nx">program</span><span class="p">.</span><span class="nx">channel</span><span class="p">});</span>
+        <span class="p">}</span>       
+      <span class="p">});</span>           </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Add schedules to the server(scheduler). 
+The server will return an id and conflicts for each newly created schedule.</p></div></div><div class="code"><div class="wrapper">  
+      <span class="nx">Schedule</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="nx">schedules</span><span class="p">,</span><span class="kd">function</span><span class="p">(</span><span class="nx">results</span><span class="p">){</span>
+        <span class="nx">process_result</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nx">results</span><span class="p">);</span>
+      <span class="p">});</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private method process_result is recursive</span></p>
+
+<p>Schedule recordings for a program</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>i must be an int.</strong><br/>(to process the i-th result)</p></li>
+<li><p><strong>results must be a [object].</strong><br/>(results returned by the server)</p></li>
+</ul></div></div><div class="code"><div class="wrapper">        <span class="kd">function</span> <span class="nx">process_result</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="nx">results</span><span class="p">){</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">i</span><span class="o">&gt;=</span><span class="nx">results</span><span class="p">.</span><span class="nx">length</span><span class="p">){</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>a lazy way to have client's data synced with the server </p>
+
+<p>TODO: </p></div></div><div class="code"><div class="wrapper">              
+                <span class="nx">$route</span><span class="p">.</span><span class="nx">reload</span><span class="p">();</span>
+                <span class="k">return</span><span class="p">;</span>
+            <span class="p">};</span>
+            <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nx">results</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">exist</span><span class="p">){</span></div></div></div><div class="segment"><div class="comments doc-section"><div class="wrapper"><p>TODO: </p></div></div><div class="code"><div class="wrapper">     
+                <span class="nx">alert</span><span class="p">(</span><span class="nx">program</span><span class="p">.</span><span class="nx">name</span> <span class="o">+</span> <span class="s2">&quot; is already in the schedule&quot;</span><span class="p">);</span>
+                <span class="k">return</span> <span class="nx">process_result</span><span class="p">(</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nx">results</span><span class="p">);</span>
+            <span class="p">}</span>               
+
+            <span class="k">if</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">conflicts</span><span class="p">.</span><span class="nx">length</span> <span class="o">!==</span> <span class="mi">0</span><span class="p">){</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>If the result contains conflicts, ask the user to prioritize the conflicts in a modal.
+Process the next result only after the current one's conflicts are resoved, that is, a promise is required.</p></div></div><div class="code"><div class="wrapper">                <span class="kd">var</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nx">resolve_conflict_async</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+                <span class="nx">promise</span><span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span></div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>without timeout, the user may not realize moving to the next conflict</p></div></div><div class="code"><div class="wrapper">                    <span class="k">return</span> <span class="nx">$timeout</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+                        <span class="nx">process_result</span><span class="p">(</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nx">results</span><span class="p">);</span>
+                    <span class="p">},</span><span class="mi">200</span><span class="p">)</span>  
+                <span class="p">})</span>
+            <span class="p">}</span><span class="k">else</span>
+                <span class="k">return</span> <span class="nx">process_result</span><span class="p">(</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nx">results</span><span class="p">);</span>
+        <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-private"><div class="wrapper"><p><span class='doc-section-header'>Private method resolve<em>conflict</em>async is asynchronous</span></p>
+
+<p>Schedule recordings for a program</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>result must be an object.</strong><br/>(the result of creating a schedule)</p></li>
+<li><p><strong>schedule must be an object.</strong><br/>(the created schedule)</p></li>
+</ul>
+
+<p><strong>Returns an object</strong><br/>(a promise)</p></div></div><div class="code"><div class="wrapper">        <span class="kd">function</span> <span class="nx">resolve_conflict_async</span><span class="p">(</span><span class="nx">result</span><span class="p">,</span><span class="nx">schedule</span><span class="p">){</span>
+            <span class="nx">conflict_deferred</span> <span class="o">=</span> <span class="nx">$q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">conflicts</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">conflicts</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">conflict</span><span class="p">){</span>
+                <span class="kd">var</span> <span class="nx">pair</span> <span class="o">=</span> <span class="nx">find_program</span><span class="p">(</span><span class="nx">conflict</span><span class="p">.</span><span class="nx">channel</span><span class="p">,</span><span class="nx">conflict</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span><span class="nx">conflict</span><span class="p">.</span><span class="nx">to</span><span class="p">);</span>
+                <span class="kd">var</span> <span class="nx">program</span> <span class="o">=</span> <span class="nx">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="kd">var</span> <span class="nx">schedule</span> <span class="o">=</span> <span class="nx">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="nx">id</span><span class="o">:</span><span class="nx">conflict</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+                    <span class="nx">name</span><span class="o">:</span><span class="nx">program</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+                    <span class="nx">from</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span>
+                    <span class="nx">to</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">,</span>
+                    <span class="nx">channel</span><span class="o">:</span><span class="nx">program</span><span class="p">.</span><span class="nx">channel</span> 
+                <span class="p">}</span>
+            <span class="p">});</span>            </div></div></div><div class="segment"><div class="comments "><div class="wrapper"><p>Add the newly created schedule to the conflicts</p></div></div><div class="code"><div class="wrapper">        
+            <span class="nx">$scope</span><span class="p">.</span><span class="nx">conflicts</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+                <span class="nx">id</span><span class="o">:</span><span class="nx">result</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+                <span class="nx">name</span><span class="o">:</span><span class="nx">program</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
+                <span class="nx">from</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span><span class="p">,</span>
+                <span class="nx">to</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">,</span>
+                <span class="nx">channel</span><span class="o">:</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">channel</span>
+            <span class="p">});</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">conflicts</span><span class="p">);</span>
+            <span class="k">return</span> <span class="nx">conflict_deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method prioritize</span></p>
+
+<p>Prioritize a list of conflicts</p></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">prioritize</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+      <span class="kd">var</span>  <span class="nx">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="kd">var</span> <span class="nx">priorities</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">conflicts</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">conflict</span><span class="p">){</span>
+        <span class="k">return</span> <span class="p">{</span>
+          <span class="nx">id</span><span class="o">:</span><span class="nx">conflict</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+          <span class="nx">priority</span><span class="o">:</span><span class="nx">i</span><span class="o">++</span>
+        <span class="p">}</span>
+      <span class="p">})</span>
+      <span class="nx">Schedule</span><span class="p">.</span><span class="nx">put</span><span class="p">({</span><span class="nx">id</span><span class="o">:</span><span class="s2">&quot;prioritize&quot;</span><span class="p">},</span><span class="nx">priorities</span><span class="p">);</span>     
+      <span class="nx">$scope</span><span class="p">.</span><span class="nx">conflicts</span> <span class="o">=</span> <span class="p">[];</span>
+      <span class="nx">conflict_deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">();</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method has<em>selected</em>schedule</span></p>
+
+<p>To check if a program has some recording schedules set by the user.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>schedules must be a [object].</strong><br/>(a list of schedules )</p></li>
+<li><p><strong>channel must be an int.</strong><br/>(the channel id)</p></li>
+</ul></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">has_selected_schedule</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">schedules</span><span class="p">,</span><span class="nx">channel</span><span class="p">){</span>
+      <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span> <span class="nx">schedules</span> <span class="o">&amp;&amp;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">length</span> <span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">selected</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">is_scheduled</span><span class="p">(</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span><span class="nx">channel</span><span class="p">))</span>
+          <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+      <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method is_scheduled</span></p>
+
+<p>To check if an episode has been scheduled to be recorded.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p><strong>schedule must be an object.</strong><br/>(a schedule)</p></li>
+<li><p><strong>channel must be an int.</strong><br/>(the channel id)</p></li>
+</ul></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">is_scheduled</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">schedule</span><span class="p">,</span> <span class="nx">channel</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span><span class="o">=</span><span class="mi">0</span> <span class="p">;</span>   <span class="nx">i</span><span class="o">&lt;</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">.</span><span class="nx">length</span> <span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+            <span class="k">if</span><span class="p">(</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">channel</span> <span class="o">===</span> <span class="nx">channel</span> <span class="o">&amp;&amp;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">from</span> <span class="o">===</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">from</span> <span class="o">&amp;&amp;</span>
+                <span class="nx">$scope</span><span class="p">.</span><span class="nx">schedules</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">to</span> <span class="o">===</span> <span class="nx">schedule</span><span class="p">.</span><span class="nx">to</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="p">}</span></div></div></div><div class="segment"><div class="comments doc-section doc-section-public"><div class="wrapper"><p><span class='doc-section-header'>Public method ended</span></p>
+
+<p>To check if a time is earlier than the current time.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><strong>time must be an int.</strong><br/>(a time value)</li>
+</ul></div></div><div class="code"><div class="wrapper">    <span class="nx">$scope</span><span class="p">.</span><span class="nx">ended</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">time</span><span class="p">){</span>
+      <span class="k">return</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span> <span class="o">&gt;</span> <span class="nx">time</span> <span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">]);</span></div></div></div></div></body></html>
