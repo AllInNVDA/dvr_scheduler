@@ -12,7 +12,7 @@ This project is...
 
 [Grunt](http://gruntjs.com/): to manage project tasks
 
-[Mocha](http://visionmedia.github.io/mocha/): for unit & integration testing
+[Mocha](http://mochajs.org/): for unit & integration testing
 
 [istanbul](http://gotwarlost.github.io/istanbul/): for coverage report
 
